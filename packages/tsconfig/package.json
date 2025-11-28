@@ -1,0 +1,11 @@
+{
+  "name": "@influencer-crm/tsconfig",
+  "version": "0.0.0",
+  "private": true,
+  "files": ["base.json", "nextjs.json", "nestjs.json"],
+  "main": "index.js",
+  "scripts": {
+    "lint": "echo 'No linting for tsconfig package'",
+    "type-check": "echo 'No type checking for tsconfig package'"
+  }
+}

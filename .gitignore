@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+.pnpm-store/
 pnpm-lock.yaml
 yarn.lock
 package-lock.json
@@ -9,7 +10,7 @@ package-lock.json
 .env.local
 .env.*.local
 # But allow backend dev environment (development only)
-!backend/.env
+!apps/backend/.env
 
 # IDE
 .vscode/
@@ -22,10 +23,17 @@ package-lock.json
 # Build outputs
 dist/
 build/
+.next/
+.turbo/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
 
 # Prisma
 .prisma/
@@ -39,3 +47,56 @@ yarn-error.log*
 Thumbs.db
 .env.production.local
 .env.test.local
+
+# Docker
+.dockerignore
+
+# Temporary files
+*.tmp
+*.temp
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# next.js build output
+.next
+
+# nuxt.js build output
+.nuxt
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
