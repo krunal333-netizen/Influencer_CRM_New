@@ -1,0 +1,287 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===== User Management =====
+
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  name      String
+  password  String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  roles     Role[]
+  firm      Firm?      @relation(fields: [firmId], references: [id])
+  firmId    String?
+  
+  @@index([firmId])
+  @@map("users")
+}
+
+model Role {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  description String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  users       User[]
+  permissions Permission[]
+  
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  roles       Role[]
+  
+  @@map("permissions")
+}
+
+// ===== Organization & Stores =====
+
+model Firm {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  address   String?
+  city      String?
+  state     String?
+  zipCode   String?
+  country   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  users     User[]
+  stores    Store[]
+  
+  @@map("firms")
+}
+
+model Store {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  address   String?
+  city      String?
+  state     String?
+  zipCode   String?
+  country   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  firm      Firm     @relation(fields: [firmId], references: [id], onDelete: Cascade)
+  firmId    String
+  
+  campaigns Campaign[]
+  
+  @@index([firmId])
+  @@map("stores")
+}
+
+// ===== Products =====
+
+model Product {
+  id        String   @id @default(cuid())
+  name      String
+  sku       String   @unique
+  description String?
+  price     Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  campaignProducts CampaignProduct[]
+  
+  @@map("products")
+}
+
+// ===== Influencers =====
+
+enum InfluencerStatus {
+  COLD
+  ACTIVE
+  FINAL
+}
+
+model Influencer {
+  id        String            @id @default(cuid())
+  name      String
+  email     String            @unique
+  phone     String?
+  bio       String?
+  followers Int?              @default(0)
+  status    InfluencerStatus  @default(COLD)
+  platform  String?           // e.g., Instagram, TikTok, YouTube
+  profileUrl String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  
+  campaignLinks InfluencerCampaignLink[]
+  
+  @@index([status])
+  @@map("influencers")
+}
+
+// ===== Campaigns =====
+
+model Campaign {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  status      String   @default("DRAFT") // DRAFT, ACTIVE, COMPLETED, CANCELLED
+  budget      Decimal? @db.Decimal(12, 2)
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId     String
+  
+  products           CampaignProduct[]
+  influencerLinks    InfluencerCampaignLink[]
+  financialDocuments FinancialDocument[]
+  
+  @@index([storeId])
+  @@index([status])
+  @@map("campaigns")
+}
+
+model CampaignProduct {
+  id          String   @id @default(cuid())
+  quantity    Int
+  discount    Decimal? @db.Decimal(5, 2)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaignId  String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId   String
+  
+  @@unique([campaignId, productId])
+  @@index([campaignId])
+  @@index([productId])
+  @@map("campaign_products")
+}
+
+// ===== Influencer-Campaign Links =====
+
+model InfluencerCampaignLink {
+  id            String   @id @default(cuid())
+  rate          Decimal  @db.Decimal(10, 2)
+  status        String   @default("PENDING") // PENDING, ACCEPTED, REJECTED, COMPLETED
+  deliverables  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  influencer    Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  influencerId  String
+  campaign      Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaignId    String
+  
+  @@unique([influencerId, campaignId])
+  @@index([influencerId])
+  @@index([campaignId])
+  @@index([status])
+  @@map("influencer_campaign_links")
+}
+
+// ===== Financial Documents =====
+
+enum FinancialDocumentType {
+  PO           // Purchase Order
+  INVOICE
+  FORM
+}
+
+model FinancialDocument {
+  id            String                  @id @default(cuid())
+  type          FinancialDocumentType
+  documentNumber String                 @unique
+  amount        Decimal                 @db.Decimal(12, 2)
+  status        String                  @default("PENDING") // PENDING, APPROVED, PAID, REJECTED
+  issueDate     DateTime
+  dueDate       DateTime?
+  paidDate      DateTime?
+  description   String?
+  metadata      Json?                   // Additional metadata as JSON
+  filePath      String?                 // Path to stored document
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  
+  campaign      Campaign                @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaignId    String
+  
+  @@index([campaignId])
+  @@index([type])
+  @@index([status])
+  @@map("financial_documents")
+}
+
+// ===== Apify Integration =====
+
+model ApifyRunLog {
+  id            String   @id @default(cuid())
+  runId         String   @unique
+  taskId        String?
+  status        String   // CREATED, READY, RUNNING, SUCCEEDED, FAILED, TIMED_OUT, ABORTED
+  startedAt     DateTime?
+  finishedAt    DateTime?
+  statusMessage String?
+  resultsCount  Int      @default(0)
+  metadata      Json?    // Additional run data
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([taskId])
+  @@index([status])
+  @@map("apify_run_logs")
+}
+
+// ===== Analytics =====
+
+model AnalyticsSnapshot {
+  id          String   @id @default(cuid())
+  timestamp   DateTime @default(now())
+  
+  // Campaign metrics
+  totalCampaigns    Int      @default(0)
+  activeCampaigns   Int      @default(0)
+  totalBudget       Decimal? @db.Decimal(15, 2)
+  
+  // Influencer metrics
+  totalInfluencers  Int      @default(0)
+  coldInfluencers   Int      @default(0)
+  activeInfluencers Int      @default(0)
+  finalInfluencers  Int      @default(0)
+  
+  // Financial metrics
+  totalRevenue      Decimal? @db.Decimal(15, 2)
+  totalExpenses     Decimal? @db.Decimal(15, 2)
+  
+  // Additional metadata
+  metadata          Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([timestamp])
+  @@map("analytics_snapshots")
+}
