@@ -1,9 +1,13 @@
-import { PrismaClient } from '@prisma/client';
+const { PrismaClient } = require('@prisma/client');
+const argon2 = require('argon2');
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('Seeding database...');
+
+  const defaultPassword = 'ChangeMe123!';
+  const hashedPassword = await argon2.hash(defaultPassword);
 
   // Clean up existing data
   await prisma.analyticsSnapshot.deleteMany();
@@ -138,7 +142,8 @@ async function main() {
     data: {
       email: 'admin@globalbrands.com',
       name: 'Admin User',
-      password: 'hashed_password_here', // In production, use proper hashing
+      password: hashedPassword,
+      hashedRefreshToken: null,
       firm: { connect: { id: firm1.id } },
       roles: { connect: [{ id: adminRole.id }] },
     },
@@ -148,7 +153,8 @@ async function main() {
     data: {
       email: 'manager@globalbrands.com',
       name: 'Manager User',
-      password: 'hashed_password_here',
+      password: hashedPassword,
+      hashedRefreshToken: null,
       firm: { connect: { id: firm1.id } },
       roles: { connect: [{ id: managerRole.id }] },
     },
@@ -431,6 +437,7 @@ Seed Summary:
 - Apify Run Logs: 1
 - Analytics Snapshots: 1
   `);
+  console.log(`Default seeded user password: ${defaultPassword}`);
 }
 
 main()

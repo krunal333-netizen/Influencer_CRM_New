@@ -1,0 +1,3 @@
+export const DEFAULT_USER_ROLE = 'COORDINATOR';
+export const ACCESS_TOKEN_TTL_FALLBACK = '15m';
+export const REFRESH_TOKEN_TTL_FALLBACK = '7d';
