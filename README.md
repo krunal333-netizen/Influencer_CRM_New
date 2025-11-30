@@ -57,6 +57,59 @@ A comprehensive Customer Relationship Management (CRM) system designed for manag
    pnpm backend prisma db seed
    ```
 
+## Authentication API Overview
+
+The backend now exposes a NestJS-powered authentication service that handles user onboarding, login, refresh-token rotation, and role-protected profile access. Passwords and refresh tokens are hashed with Argon2 and refresh tokens are stored as HTTP-only cookies to prevent JavaScript access.
+
+### Endpoints
+
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| POST | `/auth/register` | Creates a coordinator-level account, hashes the password, rotates refresh tokens, and returns a sanitized profile. |
+| POST | `/auth/login` | Validates credentials, issues fresh access/refresh tokens, and persists the hashed refresh token. |
+| POST | `/auth/refresh` | Reads the HTTP-only `refresh_token` cookie, verifies it, and rotates both tokens atomically. |
+| GET | `/auth/me` | Returns the authenticated user's profile (roles + firm context) using the access token. |
+| POST | `/auth/logout` | Revokes the stored refresh token hash and clears authentication cookies. |
+
+Tokens are delivered via the `access_token` and `refresh_token` cookies (HTTP-only, `SameSite=Lax` in dev). Access tokens default to 15 minutes, refresh tokens to 7 days, and both values can be overridden with env variables.
+
+### Running the backend locally
+
+```bash
+# watch mode
+pnpm --filter @influencer-crm/backend start:dev
+
+# production build
+pnpm --filter @influencer-crm/backend build && pnpm --filter @influencer-crm/backend start
+```
+
+## Frontend (React + Tailwind)
+
+A small React client (Vite + TypeScript) demonstrates the auth flow with React Query mutations, React Hook Form + Zod validation, Tailwind styling, and an auth context that gates protected routes.
+
+```bash
+pnpm --filter @influencer-crm/frontend dev   # http://localhost:5173
+```
+
+Key features:
+- Login & registration screens with inline validation and API error surfaces
+- React Query mutations that call the backend with `withCredentials` enabled (for cookies)
+- Auth provider that hydrates `/auth/me`, exposes `logout`, and guards routes via `<ProtectedRoute />`
+- Tailwind-powered UI cards for forms and the sample dashboard
+
+### Environment variables
+
+| Variable | Description |
+| -------- | ----------- |
+| `DATABASE_URL` | PostgreSQL connection string used by Prisma. |
+| `PORT` | NestJS server port (defaults to 3000). |
+| `FRONTEND_URL` | Comma-separated list of allowed origins for CORS. |
+| `COOKIE_DOMAIN` | Optional domain override for auth cookies. |
+| `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | Secrets used to sign the respective JWTs. |
+| `JWT_ACCESS_EXPIRES_IN` / `JWT_REFRESH_EXPIRES_IN` | Human-friendly TTL strings (`15m`, `7d`, etc.). |
+
+See [`docs/AUTH_FLOW.md`](./docs/AUTH_FLOW.md) for a deeper dive into request/response examples, Thunder Client snippets, and troubleshooting tips.
+
 ## Data Layer
 
 The backend uses **Prisma ORM** with **PostgreSQL** to manage data. The schema includes:
