@@ -1,71 +1,112 @@
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import DashboardLayout from '../components/layout/DashboardLayout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
 
 const DashboardPage = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
+  const { user } = useAuth();
 
   if (!user) {
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 px-4 py-10">
-      <div className="mx-auto max-w-5xl">
-        <header className="flex flex-col items-start justify-between gap-4 rounded-2xl bg-white p-8 shadow">
-          <div>
-            <p className="text-sm uppercase tracking-wide text-slate-400">Signed in as</p>
-            <h1 className="text-3xl font-semibold text-slate-900">{user.name}</h1>
-            <p className="text-slate-500">{user.email}</p>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="rounded-full border border-slate-200 px-6 py-2 text-sm font-medium text-slate-600 transition hover:border-rose-200 hover:text-rose-500"
-          >
-            Log out
-          </button>
-        </header>
-
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
-          <section className="rounded-2xl bg-white p-6 shadow">
-            <h2 className="text-lg font-semibold text-slate-900">Firm context</h2>
-            {user.firm ? (
-              <div className="mt-4 space-y-1 text-sm text-slate-600">
-                <p className="font-medium text-slate-800">{user.firm.name}</p>
-                <p>{user.firm.email}</p>
-                {user.firm.city && (
-                  <p>
-                    {user.firm.city}
-                    {user.firm.state ? `, ${user.firm.state}` : ''}
-                  </p>
-                )}
-              </div>
-            ) : (
-              <p className="mt-4 text-sm text-slate-500">You have not joined a firm yet.</p>
-            )}
-          </section>
-
-          <section className="rounded-2xl bg-white p-6 shadow">
-            <h2 className="text-lg font-semibold text-slate-900">Role assignments</h2>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {user.roles.map((role) => (
-                <span key={role.id} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
-                  {role.name}
-                </span>
-              ))}
-            </div>
-            <p className="mt-4 text-sm text-slate-500">
-              Protected routes on the client are unlocked automatically after authentication.
-            </p>
-          </section>
+    <DashboardLayout>
+      <div className="space-y-8 p-6 md:p-8">
+        {/* Welcome Section */}
+        <div>
+          <h2 className="text-3xl font-bold text-slate-900">Welcome back, {user.name}!</h2>
+          <p className="text-slate-600">Here's an overview of your CRM dashboard.</p>
         </div>
+
+        {/* Grid Layout */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Firm Context Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Firm Context</CardTitle>
+              <CardDescription>Your organization details</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {user.firm ? (
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm text-slate-500">Name</p>
+                    <p className="font-medium text-slate-900">{user.firm.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500">Email</p>
+                    <p className="font-medium text-slate-900">{user.firm.email}</p>
+                  </div>
+                  {user.firm.city && (
+                    <div>
+                      <p className="text-sm text-slate-500">Location</p>
+                      <p className="font-medium text-slate-900">
+                        {user.firm.city}
+                        {user.firm.state ? `, ${user.firm.state}` : ''}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-500">You have not joined a firm yet.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Role Assignments Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Role Assignments</CardTitle>
+              <CardDescription>Your permissions and roles</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {user.roles.map((role) => (
+                  <Badge key={role.id} variant="secondary">
+                    {role.name}
+                  </Badge>
+                ))}
+              </div>
+              {user.roles.length === 0 && (
+                <p className="text-sm text-slate-500">No roles assigned yet.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Access Cards */}
+        <div>
+          <h3 className="mb-4 text-lg font-semibold text-slate-900">Quick Stats</h3>
+          <div className="grid gap-4 md:grid-cols-4">
+            {[
+              { label: 'Total Influencers', value: 0, icon: '👥' },
+              { label: 'Active Campaigns', value: 0, icon: '⚡' },
+              { label: 'Products', value: 0, icon: '📦' },
+              { label: 'Recent Documents', value: 0, icon: '📄' },
+            ].map((stat) => (
+              <Card key={stat.label}>
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <p className="text-4xl font-bold text-slate-900">{stat.value}</p>
+                    <p className="mt-2 text-sm text-slate-600">{stat.label}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Navigation Info */}
+        <Card className="border-brand-accent/20 bg-brand-primary/5">
+          <CardContent className="pt-6">
+            <p className="text-sm text-slate-600">
+              Use the sidebar to navigate to different modules: <strong>Influencers, Campaigns, Products, Firms & Stores, Financial Overview, and Analytics.</strong>
+            </p>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
