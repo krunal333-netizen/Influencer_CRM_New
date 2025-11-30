@@ -1,0 +1,36 @@
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { CampaignsService } from './campaigns.service';
+import { CreateCampaignDto } from './dto/create-campaign.dto';
+import { UpdateCampaignDto } from './dto/update-campaign.dto';
+import { AccessTokenGuard } from '../common/guards/access-token.guard';
+
+@Controller('campaigns')
+@UseGuards(AccessTokenGuard)
+export class CampaignsController {
+  constructor(private readonly campaignsService: CampaignsService) {}
+
+  @Post()
+  create(@Body() createCampaignDto: CreateCampaignDto) {
+    return this.campaignsService.create(createCampaignDto);
+  }
+
+  @Get()
+  findAll() {
+    return this.campaignsService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.campaignsService.findOne(id);
+  }
+
+  @Put(':id')
+  update(@Param('id') id: string, @Body() updateCampaignDto: UpdateCampaignDto) {
+    return this.campaignsService.update(id, updateCampaignDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.campaignsService.remove(id);
+  }
+}
