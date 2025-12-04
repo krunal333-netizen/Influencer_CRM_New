@@ -8,5 +8,6 @@ module.exports = {
   },
   testRegex: '.*\\.spec\\.ts$',
   collectCoverageFrom: ['src/**/*.ts'],
-  coveragePathIgnorePatterns: ['/node_modules/', '/dist/']
+  coveragePathIgnorePatterns: ['/node_modules/', '/dist/'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js']
 };

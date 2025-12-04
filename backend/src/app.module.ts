@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { InfluencersModule } from './influencers/influencers.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { ProductsModule } from './products/products.module';
+import { ApifyModule } from './apify/apify.module';
 import { RolesGuard } from './common/guards/roles.guard';
 
 @Module({
@@ -18,6 +19,7 @@ import { RolesGuard } from './common/guards/roles.guard';
     InfluencersModule,
     CampaignsModule,
     ProductsModule,
+    ApifyModule,
   ],
   providers: [
     {

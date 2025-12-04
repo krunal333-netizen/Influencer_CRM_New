@@ -15,7 +15,7 @@
     "strictNullChecks": true,
     "strictBindCallApply": true,
     "moduleResolution": "node",
-    "types": ["node"],
+    "types": ["node", "jest"],
     "resolveJsonModule": true,
     "esModuleInterop": true
   },
