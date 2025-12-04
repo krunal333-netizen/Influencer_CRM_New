@@ -1,11 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ApifyService } from '../apify/apify.service';
 import { CreateInfluencerDto } from './dto/create-influencer.dto';
 import { UpdateInfluencerDto } from './dto/update-influencer.dto';
+import { InstagramProfileData } from '../apify/types/apify.types';
 
 @Injectable()
 export class InfluencersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly apifyService: ApifyService,
+  ) {}
 
   async create(createInfluencerDto: CreateInfluencerDto) {
     return this.prisma.influencer.create({
@@ -55,5 +60,41 @@ export class InfluencersService {
     return this.prisma.influencer.delete({
       where: { id },
     });
+  }
+
+  async createFromScrapedData(
+    scrapedData: InstagramProfileData,
+    additionalData: Partial<CreateInfluencerDto> = {},
+  ): Promise<any> {
+    // Check for duplicate email
+    if (scrapedData.emails && scrapedData.emails.length > 0) {
+      const existingInfluencer = await this.prisma.influencer.findUnique({
+        where: { email: scrapedData.emails[0] },
+      });
+
+      if (existingInfluencer) {
+        throw new ConflictException(`Influencer with email ${scrapedData.emails[0]} already exists`);
+      }
+    }
+
+    const influencerData: CreateInfluencerDto = {
+      name: scrapedData.fullName || scrapedData.username,
+      email: scrapedData.emails?.[0] || `${scrapedData.username}@instagram.com`,
+      followers: scrapedData.followersCount,
+      bio: scrapedData.bio,
+      platform: 'Instagram',
+      profileUrl: scrapedData.profileUrl,
+      ...additionalData,
+    };
+
+    return this.create(influencerData);
+  }
+
+  async checkEmailExists(email: string): Promise<boolean> {
+    const existingInfluencer = await this.prisma.influencer.findUnique({
+      where: { email },
+    });
+
+    return !!existingInfluencer;
   }
 }

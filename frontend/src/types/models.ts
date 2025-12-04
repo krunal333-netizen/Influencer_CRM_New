@@ -123,3 +123,41 @@ export interface Store {
   createdAt: string;
   updatedAt: string;
 }
+
+// Apify related types
+export interface InstagramProfileData {
+  username: string;
+  fullName: string;
+  bio: string;
+  followersCount: number;
+  profilePictureUrl: string;
+  profileUrl: string;
+  emails?: string[];
+}
+
+export interface ApifyRunResult {
+  profileData: InstagramProfileData | null;
+  emails: string[];
+  success: boolean;
+  error?: string;
+}
+
+export interface ScrapeProfileRequest {
+  instagramUrl: string;
+  dryRun?: boolean;
+}
+
+export interface ScrapeProfileResponse {
+  runId: string;
+  message: string;
+}
+
+export interface RunStatusResponse {
+  runId: string;
+  status: string;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+  statusMessage?: string | null;
+  resultsCount: number;
+  isDryRun: boolean;
+}

@@ -1,5 +1,10 @@
 import { IsEmail, IsEnum, IsInt, IsOptional, IsString, IsUrl, Min } from 'class-validator';
-import { InfluencerStatus } from '@prisma/client';
+
+enum InfluencerStatus {
+  COLD = 'COLD',
+  ACTIVE = 'ACTIVE',
+  FINAL = 'FINAL'
+}
 
 export class CreateInfluencerDto {
   @IsString()

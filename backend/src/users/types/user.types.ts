@@ -1,11 +1,9 @@
-import { Prisma } from '@prisma/client';
+import { User, Role, Firm } from '@prisma/client';
 
-export type UserWithRelations = Prisma.UserGetPayload<{
-  include: {
-    roles: true;
-    firm: true;
-  };
-}>;
+export type UserWithRelations = User & {
+  roles: Role[];
+  firm?: Firm | null;
+};
 
 export type SafeUser = Omit<UserWithRelations, 'password' | 'hashedRefreshToken'>;
 
