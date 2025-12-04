@@ -69,7 +69,7 @@ export class UsersService {
       return null;
     }
 
-    const { password, hashedRefreshToken, ...safeUser } = user;
+    const { password: _password, hashedRefreshToken: _hashedRefreshToken, ...safeUser } = user;
     return safeUser as SafeUser;
   }
 }

@@ -4,8 +4,10 @@ interface StatusBadgeProps {
   status: string;
 }
 
+type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning' | 'info';
+
 export default function StatusBadge({ status }: StatusBadgeProps) {
-  const getVariant = (status: string) => {
+  const getVariant = (status: string): BadgeVariant => {
     switch (status?.toUpperCase()) {
       case 'COLD':
         return 'outline';
@@ -48,7 +50,7 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
   };
 
   return (
-    <Badge variant={getVariant(status) as any}>
+    <Badge variant={getVariant(status)}>
       {formatLabel(status)}
     </Badge>
   );

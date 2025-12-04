@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Card, CardContent } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -19,7 +19,7 @@ export default function InfluencersPage() {
     FINAL: influencers.filter((i) => i.status === 'FINAL'),
   };
 
-  const InfluencerCard = ({ influencer }: any) => (
+  const InfluencerCard = ({ influencer }: { influencer: typeof influencers[number] }) => (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="pt-6">
         <div className="space-y-3">

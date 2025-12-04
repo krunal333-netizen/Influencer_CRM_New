@@ -1,14 +1,13 @@
-import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { useProducts } from '../hooks/useProducts';
 
 export default function ProductsPage() {
   const { data: products = [], isLoading, isError } = useProducts();
 
-  const ProductCard = ({ product }: any) => (
+  const ProductCard = ({ product }: { product: typeof products[number] }) => (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="pt-6">
         <div className="space-y-3">
