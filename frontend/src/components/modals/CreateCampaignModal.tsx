@@ -14,7 +14,6 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { useCreateCampaign } from '../../hooks/useCampaigns';
-import { useAuth } from '../../hooks/useAuth';
 
 const createCampaignSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -36,7 +35,6 @@ export default function CreateCampaignModal({
   onOpenChange,
 }: CreateCampaignModalProps) {
   const { mutate: createCampaign, isPending } = useCreateCampaign();
-  const { user } = useAuth();
   const [storeId, setStoreId] = useState('');
 
   const {
@@ -57,9 +55,9 @@ export default function CreateCampaignModal({
     createCampaign(
       {
         ...data,
-        status: 'DRAFT',
+        status: 'DRAFT' as const,
         storeId,
-      } as any,
+      },
       {
         onSuccess: () => {
           reset();

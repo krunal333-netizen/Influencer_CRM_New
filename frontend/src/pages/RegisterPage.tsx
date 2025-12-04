@@ -41,7 +41,7 @@ const RegisterPage = () => {
     },
   });
 
-  const onSubmit = ({ confirmPassword, ...rest }: RegisterFormValues) => {
+  const onSubmit = ({ confirmPassword: _confirmPassword, ...rest }: RegisterFormValues) => {
     registerMutation.mutate(rest);
   };
 

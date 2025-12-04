@@ -16,7 +16,7 @@ const DashboardPage = () => {
         {/* Welcome Section */}
         <div>
           <h2 className="text-3xl font-bold text-slate-900">Welcome back, {user.name}!</h2>
-          <p className="text-slate-600">Here's an overview of your CRM dashboard.</p>
+          <p className="text-slate-600">Here&apos;s an overview of your CRM dashboard.</p>
         </div>
 
         {/* Grid Layout */}

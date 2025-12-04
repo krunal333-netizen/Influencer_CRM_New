@@ -7,9 +7,13 @@
   "scripts": {
     "backend": "cd backend && pnpm",
     "prisma": "cd backend && pnpm prisma",
-    "migrate": "cd backend && pnpm prisma migrate dev"
+    "migrate": "cd backend && pnpm prisma migrate dev",
+    "lint": "pnpm -r lint"
   },
   "workspaces": ["backend"],
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  },
   "engines": {
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
