@@ -107,6 +107,98 @@ Key features:
 | `COOKIE_DOMAIN` | Optional domain override for auth cookies. |
 | `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | Secrets used to sign the respective JWTs. |
 | `JWT_ACCESS_EXPIRES_IN` / `JWT_REFRESH_EXPIRES_IN` | Human-friendly TTL strings (`15m`, `7d`, etc.). |
+| `APIFY_API_KEY` | Optional Apify API key for Instagram scraping. Leave empty for dry-run mode only. |
+
+### Apify Instagram Scraping Integration
+
+The system includes optional Instagram profile scraping via Apify to automatically populate influencer data.
+
+#### Setup Instructions
+
+1. **Get Apify API Key** (optional):
+   - Sign up at [Apify](https://apify.com/)
+   - Navigate to Account → Integrations → API Token
+   - Copy your API token
+
+2. **Configure Environment**:
+   ```bash
+   # Add to backend/.env
+   APIFY_API_KEY="your_apify_api_key_here"
+   ```
+
+3. **Dry-run Mode** (works without API key):
+   - Set `dryRun: true` when calling scrape endpoints
+   - Returns mock data for testing
+   - Perfect for development and demos
+
+#### Available Endpoints
+
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| POST | `/apify/scrape-profile` | Trigger Instagram profile scrape |
+| GET | `/apify/run/:runId/status` | Check scrape job status |
+| GET | `/apify/run/:runId/results` | Get scraped profile data |
+
+#### Usage Examples
+
+**Start a scrape job (dry-run):**
+```bash
+curl -X POST http://localhost:3000/apify/scrape-profile \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "instagramUrl": "https://www.instagram.com/username",
+    "dryRun": true
+  }'
+```
+
+**Check job status:**
+```bash
+curl -X GET http://localhost:3000/apify/run/{runId}/status \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+**Get results:**
+```bash
+curl -X GET http://localhost:3000/apify/run/{runId}/results \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+**Create influencer from scraped data:**
+```bash
+curl -X POST http://localhost:3000/influencers/from-scraped-data \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "scrapedData": {
+      "username": "johndoe",
+      "fullName": "John Doe",
+      "bio": "Digital creator | Photographer",
+      "followersCount": 15420,
+      "profilePictureUrl": "https://example.com/avatar.jpg",
+      "profileUrl": "https://www.instagram.com/johndoe",
+      "emails": ["john@example.com"]
+    }
+  }'
+```
+
+#### Features
+
+- ✅ **Dry-run mode**: Test without API credentials
+- ✅ **Auto-population**: Name, email, followers, bio from Instagram
+- ✅ **Email extraction**: Additional email discovery service
+- ✅ **Duplicate detection**: Prevents duplicate influencer creation
+- ✅ **Error handling**: Comprehensive error responses
+- ✅ **Swagger docs**: Complete API documentation at `/api`
+
+#### Integration with Influencer Creation
+
+The influencer creation flow can automatically trigger Instagram scraping when a profile URL is provided, populating fields like:
+- Profile Name (fullName)
+- Followers Count
+- Email (extracted from bio/email scraper)
+- Bio
+- Profile Avatar URL
 
 See [`docs/AUTH_FLOW.md`](./docs/AUTH_FLOW.md) for a deeper dive into request/response examples, Thunder Client snippets, and troubleshooting tips.
 
