@@ -1,5 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards, ConflictException } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+  ConflictException,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { InfluencersService } from './influencers.service';
 import { CreateInfluencerDto } from './dto/create-influencer.dto';
 import { UpdateInfluencerDto } from './dto/update-influencer.dto';
@@ -22,17 +32,25 @@ export class InfluencersController {
   }
 
   @Post('from-scraped-data')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Create influencer from scraped Instagram data',
-    description: 'Creates an influencer using data scraped from Instagram profile. Automatically populates name, email, followers, bio, and profile URL.'
+    description:
+      'Creates an influencer using data scraped from Instagram profile. Automatically populates name, email, followers, bio, and profile URL.',
   })
-  @ApiResponse({ status: 201, description: 'Influencer created successfully from scraped data' })
-  @ApiResponse({ status: 409, description: 'Influencer with email already exists' })
+  @ApiResponse({
+    status: 201,
+    description: 'Influencer created successfully from scraped data',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Influencer with email already exists',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async createFromScrapedData(
-    @Body() data: { 
-      scrapedData: InstagramProfileData; 
-      additionalData?: Partial<CreateInfluencerDto> 
+    @Body()
+    data: {
+      scrapedData: InstagramProfileData;
+      additionalData?: Partial<CreateInfluencerDto>;
     }
   ) {
     try {
@@ -44,7 +62,9 @@ export class InfluencersController {
       if (error instanceof ConflictException) {
         throw error;
       }
-      throw new ConflictException('Failed to create influencer from scraped data');
+      throw new ConflictException(
+        'Failed to create influencer from scraped data'
+      );
     }
   }
 
@@ -72,7 +92,10 @@ export class InfluencersController {
   @ApiResponse({ status: 200, description: 'Influencer updated successfully' })
   @ApiResponse({ status: 404, description: 'Influencer not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  update(@Param('id') id: string, @Body() updateInfluencerDto: UpdateInfluencerDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateInfluencerDto: UpdateInfluencerDto
+  ) {
     return this.influencersService.update(id, updateInfluencerDto);
   }
 

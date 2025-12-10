@@ -1,16 +1,16 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { 
-  scrapeProfileRequest, 
-  getRunStatusRequest, 
+import {
+  scrapeProfileRequest,
+  getRunStatusRequest,
   getRunResultsRequest,
-  createInfluencerFromScrapedDataRequest 
+  createInfluencerFromScrapedDataRequest,
 } from '../api/client';
-import { 
-  ScrapeProfileRequest, 
-  ScrapeProfileResponse, 
-  RunStatusResponse, 
+import {
+  ScrapeProfileRequest,
+  ScrapeProfileResponse,
+  RunStatusResponse,
   ApifyRunResult,
-  InstagramProfileData 
+  InstagramProfileData,
 } from '../types/models';
 
 export function useScrapeProfile() {
@@ -47,8 +47,15 @@ export function useRunResults(runId: string, enabled: boolean = true) {
 }
 
 export function useCreateInfluencerFromScrapedData() {
-  return useMutation<any, Error, { scrapedData: InstagramProfileData; additionalData?: any }>({
-    mutationFn: ({ scrapedData, additionalData }) => 
+  return useMutation<
+    Record<string, unknown>,
+    Error,
+    {
+      scrapedData: InstagramProfileData;
+      additionalData?: Record<string, unknown>;
+    }
+  >({
+    mutationFn: ({ scrapedData, additionalData }) =>
       createInfluencerFromScrapedDataRequest(scrapedData, additionalData),
   });
 }

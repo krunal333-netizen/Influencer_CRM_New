@@ -4,6 +4,9 @@
   "description": "Influencer CRM backend",
   "private": true,
   "type": "commonjs",
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "scripts": {
     "build": "rimraf dist && tsc -p tsconfig.build.json",
     "start": "node dist/main.js",

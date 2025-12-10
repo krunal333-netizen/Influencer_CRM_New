@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, Download, ExternalLink, User } from 'lucide-react';
+import { Loader2, Download, User } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -18,11 +18,11 @@ import { Switch } from '../ui/switch';
 import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { useCreateInfluencer } from '../../hooks/useInfluencers';
-import { 
-  useScrapeProfile, 
-  useRunStatus, 
+import {
+  useScrapeProfile,
+  useRunStatus,
   useRunResults,
-  useCreateInfluencerFromScrapedData 
+  useCreateInfluencerFromScrapedData,
 } from '../../hooks/useApify';
 import { InstagramProfileData } from '../../types/models';
 
@@ -49,19 +49,23 @@ export default function CreateInfluencerModal({
 }: CreateInfluencerModalProps) {
   const [dryRun, setDryRun] = useState(true);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
-  const [scrapedData, setScrapedData] = useState<InstagramProfileData | null>(null);
+  const [scrapedData, setScrapedData] = useState<InstagramProfileData | null>(
+    null
+  );
   const [isScraping, setIsScraping] = useState(false);
 
   const { mutate: createInfluencer, isPending } = useCreateInfluencer();
-  const { mutate: scrapeProfile, isPending: isScrapePending } = useScrapeProfile();
-  const { mutate: createFromScraped, isPending: isCreateFromScrapedPending } = useCreateInfluencerFromScrapedData();
+  const { mutate: scrapeProfile, isPending: isScrapePending } =
+    useScrapeProfile();
+  const { mutate: createFromScraped, isPending: isCreateFromScrapedPending } =
+    useCreateInfluencerFromScrapedData();
 
   // Query for run status
   const { data: runStatus } = useRunStatus(currentRunId || '', !!currentRunId);
-  
+
   // Query for run results (only when status is SUCCEEDED)
   const { data: runResults } = useRunResults(
-    currentRunId || '', 
+    currentRunId || '',
     !!currentRunId && runStatus?.status === 'SUCCEEDED'
   );
 
@@ -82,8 +86,15 @@ export default function CreateInfluencerModal({
   useEffect(() => {
     if (runResults?.profileData) {
       setScrapedData(runResults.profileData);
-      setValue('name', runResults.profileData.fullName || runResults.profileData.username);
-      setValue('email', runResults.profileData.emails?.[0] || `${runResults.profileData.username}@instagram.com`);
+      setValue(
+        'name',
+        runResults.profileData.fullName || runResults.profileData.username
+      );
+      setValue(
+        'email',
+        runResults.profileData.emails?.[0] ||
+          `${runResults.profileData.username}@instagram.com`
+      );
       setValue('bio', runResults.profileData.bio);
       setValue('followers', runResults.profileData.followersCount);
       setValue('platform', 'Instagram');
@@ -140,11 +151,12 @@ export default function CreateInfluencerModal({
           setCurrentRunId(null);
           onOpenChange(false);
         },
-      },
+      }
     );
   };
 
-  const isLoading = isPending || isScrapePending || isCreateFromScrapedPending || isScraping;
+  const isLoading =
+    isPending || isScrapePending || isCreateFromScrapedPending || isScraping;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -152,7 +164,8 @@ export default function CreateInfluencerModal({
         <DialogHeader>
           <DialogTitle>Create New Influencer</DialogTitle>
           <DialogDescription>
-            Add a new influencer to your database. Auto-fetch data from Instagram profile URL.
+            Add a new influencer to your database. Auto-fetch data from
+            Instagram profile URL.
           </DialogDescription>
         </DialogHeader>
 
@@ -175,7 +188,9 @@ export default function CreateInfluencerModal({
                   </div>
                   <p className="text-sm text-slate-600">{scrapedData.bio}</p>
                   <div className="flex items-center gap-4 text-sm text-slate-500">
-                    <span>{scrapedData.followersCount.toLocaleString()} followers</span>
+                    <span>
+                      {scrapedData.followersCount.toLocaleString()} followers
+                    </span>
                     {scrapedData.emails && scrapedData.emails.length > 0 && (
                       <span>✉️ {scrapedData.emails.length} email(s) found</span>
                     )}
@@ -187,7 +202,9 @@ export default function CreateInfluencerModal({
                       disabled={isCreateFromScrapedPending}
                     >
                       <User className="mr-2 h-4 w-4" />
-                      {isCreateFromScrapedPending ? 'Creating...' : 'Create from Scraped Data'}
+                      {isCreateFromScrapedPending
+                        ? 'Creating...'
+                        : 'Create from Scraped Data'}
                     </Button>
                     <Button
                       size="sm"
@@ -232,9 +249,11 @@ export default function CreateInfluencerModal({
                   </Button>
                 </div>
                 {errors.profileUrl && (
-                  <p className="text-sm text-red-500">{errors.profileUrl.message}</p>
+                  <p className="text-sm text-red-500">
+                    {errors.profileUrl.message}
+                  </p>
                 )}
-                
+
                 {/* Dry-run toggle */}
                 <div className="flex items-center gap-2">
                   <Switch
@@ -258,7 +277,9 @@ export default function CreateInfluencerModal({
                         Scraping status: <strong>{runStatus.status}</strong>
                       </span>
                       {runStatus.isDryRun && (
-                        <Badge variant="outline" className="text-xs">Test Mode</Badge>
+                        <Badge variant="outline" className="text-xs">
+                          Test Mode
+                        </Badge>
                       )}
                     </div>
                   </CardContent>
@@ -305,11 +326,7 @@ export default function CreateInfluencerModal({
               {/* Bio */}
               <div className="grid gap-2">
                 <Label htmlFor="bio">Bio</Label>
-                <Input
-                  id="bio"
-                  placeholder="Enter bio"
-                  {...register('bio')}
-                />
+                <Input id="bio" placeholder="Enter bio" {...register('bio')} />
               </div>
 
               {/* Followers */}

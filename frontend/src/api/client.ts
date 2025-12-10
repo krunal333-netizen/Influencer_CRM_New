@@ -1,11 +1,16 @@
 import axios from 'axios';
-import { AuthResponse, LoginPayload, RegisterPayload, SafeUser } from '../types/auth';
-import { 
-  ScrapeProfileRequest, 
-  ScrapeProfileResponse, 
-  RunStatusResponse, 
+import {
+  AuthResponse,
+  LoginPayload,
+  RegisterPayload,
+  SafeUser,
+} from '../types/auth';
+import {
+  ScrapeProfileRequest,
+  ScrapeProfileResponse,
+  RunStatusResponse,
   ApifyRunResult,
-  InstagramProfileData 
+  InstagramProfileData,
 } from '../types/models';
 
 const apiClient = axios.create({
@@ -13,13 +18,20 @@ const apiClient = axios.create({
   withCredentials: true,
 });
 
-export const loginRequest = async (payload: LoginPayload): Promise<AuthResponse> => {
+export const loginRequest = async (
+  payload: LoginPayload
+): Promise<AuthResponse> => {
   const { data } = await apiClient.post<AuthResponse>('/auth/login', payload);
   return data;
 };
 
-export const registerRequest = async (payload: RegisterPayload): Promise<AuthResponse> => {
-  const { data } = await apiClient.post<AuthResponse>('/auth/register', payload);
+export const registerRequest = async (
+  payload: RegisterPayload
+): Promise<AuthResponse> => {
+  const { data } = await apiClient.post<AuthResponse>(
+    '/auth/register',
+    payload
+  );
   return data;
 };
 
@@ -38,29 +50,45 @@ export const logoutRequest = async (): Promise<void> => {
 };
 
 // Apify API functions
-export const scrapeProfileRequest = async (payload: ScrapeProfileRequest): Promise<ScrapeProfileResponse> => {
-  const { data } = await apiClient.post<ScrapeProfileResponse>('/apify/scrape-profile', payload);
+export const scrapeProfileRequest = async (
+  payload: ScrapeProfileRequest
+): Promise<ScrapeProfileResponse> => {
+  const { data } = await apiClient.post<ScrapeProfileResponse>(
+    '/apify/scrape-profile',
+    payload
+  );
   return data;
 };
 
-export const getRunStatusRequest = async (runId: string): Promise<RunStatusResponse> => {
-  const { data } = await apiClient.get<RunStatusResponse>(`/apify/run/${runId}/status`);
+export const getRunStatusRequest = async (
+  runId: string
+): Promise<RunStatusResponse> => {
+  const { data } = await apiClient.get<RunStatusResponse>(
+    `/apify/run/${runId}/status`
+  );
   return data;
 };
 
-export const getRunResultsRequest = async (runId: string): Promise<ApifyRunResult> => {
-  const { data } = await apiClient.get<ApifyRunResult>(`/apify/run/${runId}/results`);
+export const getRunResultsRequest = async (
+  runId: string
+): Promise<ApifyRunResult> => {
+  const { data } = await apiClient.get<ApifyRunResult>(
+    `/apify/run/${runId}/results`
+  );
   return data;
 };
 
 export const createInfluencerFromScrapedDataRequest = async (
   scrapedData: InstagramProfileData,
-  additionalData?: any
-): Promise<any> => {
-  const { data } = await apiClient.post('/influencers/from-scraped-data', {
-    scrapedData,
-    additionalData,
-  });
+  additionalData?: Record<string, unknown>
+): Promise<Record<string, unknown>> => {
+  const { data } = await apiClient.post<Record<string, unknown>>(
+    '/influencers/from-scraped-data',
+    {
+      scrapedData,
+      additionalData,
+    }
+  );
   return data;
 };
 
