@@ -2,10 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { ApifyClient } from 'apify';
-import { 
-  InstagramProfileData, 
-  ApifyRunResult, 
-  ApifyRunStatus 
+import {
+  InstagramProfileData,
+  ApifyRunResult,
+  ApifyRunStatus,
 } from './types/apify.types';
 import { ScrapeProfileDto } from './dto/scrape-profile.dto';
 
@@ -16,7 +16,7 @@ export class ApifyService {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly prisma: PrismaService,
+    private readonly prisma: PrismaService
   ) {
     const apiKey = this.configService.get<string>('APIFY_API_KEY');
     this.apifyClient = new ApifyClient({
@@ -30,12 +30,17 @@ export class ApifyService {
     if (dryRun) {
       const runId = `dry-run-${Date.now()}`;
       await this.createApifyRunLog(runId, null, ApifyRunStatus.CREATED);
-      
+
       // Simulate async processing for dry run
       setTimeout(async () => {
         await this.updateApifyRunLog(runId, ApifyRunStatus.RUNNING);
         setTimeout(async () => {
-          await this.updateApifyRunLog(runId, ApifyRunStatus.SUCCEEDED, 'Dry run completed successfully', 1);
+          await this.updateApifyRunLog(
+            runId,
+            ApifyRunStatus.SUCCEEDED,
+            'Dry run completed successfully',
+            1
+          );
         }, 2000);
       }, 1000);
 
@@ -46,7 +51,7 @@ export class ApifyService {
     return runId;
   }
 
-  async getRunStatus(runId: string): Promise<any> {
+  async getRunStatus(runId: string): Promise<Record<string, unknown>> {
     // Check if it's a dry run
     if (runId.startsWith('dry-run-')) {
       const log = await this.prisma.apifyRunLog.findUnique({
@@ -70,17 +75,17 @@ export class ApifyService {
 
     try {
       const run = await this.apifyClient.run(runId).get();
-      
+
       if (!run) {
         throw new Error('Run not found');
       }
-      
+
       // Update local log
       await this.updateApifyRunLog(
         run.id,
         run.status as ApifyRunStatus,
         run.statusMessage,
-        0, // We'll use a default count since stats structure may vary
+        0 // We'll use a default count since stats structure may vary
       );
 
       return {
@@ -118,12 +123,14 @@ export class ApifyService {
 
     try {
       // Get Instagram scraper results
-      const instagramItems: any[] = [];
-      const instagramDataset = await this.apifyClient.dataset(runId).listItems();
-      
+      const instagramItems: Record<string, unknown>[] = [];
+      const instagramDataset = await this.apifyClient
+        .dataset(runId)
+        .listItems();
+
       if (instagramDataset.items) {
         for (const item of instagramDataset.items) {
-          instagramItems.push(item);
+          instagramItems.push(item as Record<string, unknown>);
         }
       }
 
@@ -157,36 +164,50 @@ export class ApifyService {
     }
   }
 
-  private async createInstagramScrapeRun(instagramUrl: string): Promise<string> {
+  private async createInstagramScrapeRun(
+    instagramUrl: string
+  ): Promise<string> {
     try {
-      const run = await this.apifyClient.actor('apify/instagram-profile-scraper').call({
-        directUrls: [instagramUrl],
-        resultsLimit: 1,
-      });
+      const run = await this.apifyClient
+        .actor('apify/instagram-profile-scraper')
+        .call({
+          directUrls: [instagramUrl],
+          resultsLimit: 1,
+        });
 
-      await this.createApifyRunLog(run.id, 'apify/instagram-profile-scraper', ApifyRunStatus.CREATED);
-      
+      await this.createApifyRunLog(
+        run.id,
+        'apify/instagram-profile-scraper',
+        ApifyRunStatus.CREATED
+      );
+
       return run.id;
     } catch (error) {
-      this.logger.error(`Failed to create Instagram scrape run: ${error.message}`);
+      this.logger.error(
+        `Failed to create Instagram scrape run: ${error.message}`
+      );
       throw new Error('Failed to trigger Instagram scrape');
     }
   }
 
   private async extractEmails(profileUrl: string): Promise<string[]> {
     try {
-      const emailScraperRun = await this.apifyClient.actor('chitosibug3/social-media-email-scraper-2026').call({
-        profileUrls: [profileUrl],
-        resultsLimit: 10,
-      });
+      const emailScraperRun = await this.apifyClient
+        .actor('chitosibug3/social-media-email-scraper-2026')
+        .call({
+          profileUrls: [profileUrl],
+          resultsLimit: 10,
+        });
 
       const emails: string[] = [];
-      const emailDataset = await this.apifyClient.dataset(emailScraperRun.id).listItems();
-      
+      const emailDataset = await this.apifyClient
+        .dataset(emailScraperRun.id)
+        .listItems();
+
       if (emailDataset.items) {
         for (const item of emailDataset.items) {
-          if ((item as any).email) {
-            emails.push((item as any).email);
+          if ((item as Record<string, unknown>).email) {
+            emails.push((item as Record<string, unknown>).email as string);
           }
         }
       }
@@ -198,20 +219,26 @@ export class ApifyService {
     }
   }
 
-  private extractInstagramProfileData(item: any): InstagramProfileData {
+  private extractInstagramProfileData(
+    item: Record<string, unknown>
+  ): InstagramProfileData {
     return {
-      username: item.username || item.ownerUsername || '',
-      fullName: item.fullName || item.ownerFullName || '',
-      bio: item.bio || item.description || '',
-      followersCount: item.followersCount || item.subscribersCount || 0,
-      profilePictureUrl: item.profilePictureUrl || item.ownerProfilePictureUrl || '',
-      profileUrl: item.url || item.ownerUrl || '',
+      username: (item.username || item.ownerUsername || '') as string,
+      fullName: (item.fullName || item.ownerFullName || '') as string,
+      bio: (item.bio || item.description || '') as string,
+      followersCount: (item.followersCount ||
+        item.subscribersCount ||
+        0) as number,
+      profilePictureUrl: (item.profilePictureUrl ||
+        item.ownerProfilePictureUrl ||
+        '') as string,
+      profileUrl: (item.url || item.ownerUrl || '') as string,
     };
   }
 
   private async createApifyRunLog(
-    runId: string, 
-    taskId: string | null, 
+    runId: string,
+    taskId: string | null,
     status: ApifyRunStatus
   ): Promise<void> {
     try {
@@ -232,10 +259,10 @@ export class ApifyService {
     runId: string,
     status: ApifyRunStatus,
     statusMessage?: string,
-    resultsCount?: number,
+    resultsCount?: number
   ): Promise<void> {
     try {
-      const updateData: any = {
+      const updateData: Record<string, unknown> = {
         status,
         updatedAt: new Date(),
       };
@@ -252,7 +279,10 @@ export class ApifyService {
         updateData.startedAt = new Date();
       }
 
-      if (status === ApifyRunStatus.SUCCEEDED || status === ApifyRunStatus.FAILED) {
+      if (
+        status === ApifyRunStatus.SUCCEEDED ||
+        status === ApifyRunStatus.FAILED
+      ) {
         updateData.finishedAt = new Date();
       }
 

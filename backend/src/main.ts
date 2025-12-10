@@ -18,7 +18,7 @@ async function bootstrap() {
       transform: true,
       forbidNonWhitelisted: true,
       transformOptions: { enableImplicitConversion: true },
-    }),
+    })
   );
 
   const allowedOrigins = configService
@@ -47,7 +47,10 @@ async function bootstrap() {
   await app.listen(port);
   // eslint-disable-next-line no-console
   console.log(`🚀 Auth API ready on http://localhost:${port}`);
-  console.log(`📚 Swagger documentation available at http://localhost:${port}/api`);
+  // eslint-disable-next-line no-console
+  console.log(
+    `📚 Swagger documentation available at http://localhost:${port}/api`
+  );
 }
 
 bootstrap();

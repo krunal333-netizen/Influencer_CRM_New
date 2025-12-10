@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ApifyService } from '../apify/apify.service';
 import { CreateInfluencerDto } from './dto/create-influencer.dto';
@@ -9,7 +13,7 @@ import { InstagramProfileData } from '../apify/types/apify.types';
 export class InfluencersService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly apifyService: ApifyService,
+    private readonly apifyService: ApifyService
   ) {}
 
   async create(createInfluencerDto: CreateInfluencerDto) {
@@ -64,8 +68,8 @@ export class InfluencersService {
 
   async createFromScrapedData(
     scrapedData: InstagramProfileData,
-    additionalData: Partial<CreateInfluencerDto> = {},
-  ): Promise<any> {
+    additionalData: Partial<CreateInfluencerDto> = {}
+  ): Promise<Record<string, unknown>> {
     // Check for duplicate email
     if (scrapedData.emails && scrapedData.emails.length > 0) {
       const existingInfluencer = await this.prisma.influencer.findUnique({
@@ -73,7 +77,9 @@ export class InfluencersService {
       });
 
       if (existingInfluencer) {
-        throw new ConflictException(`Influencer with email ${scrapedData.emails[0]} already exists`);
+        throw new ConflictException(
+          `Influencer with email ${scrapedData.emails[0]} already exists`
+        );
       }
     }
 
