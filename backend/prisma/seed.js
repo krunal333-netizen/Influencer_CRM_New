@@ -10,6 +10,8 @@ async function main() {
   const hashedPassword = await argon2.hash(defaultPassword);
 
   // Clean up existing data
+  await prisma.courierShipment.deleteMany();
+  await prisma.invoiceImage.deleteMany();
   await prisma.analyticsSnapshot.deleteMany();
   await prisma.apifyRunLog.deleteMany();
   await prisma.financialDocument.deleteMany();
@@ -195,32 +197,80 @@ async function main() {
       data: {
         name: 'Premium Sunglasses',
         sku: 'SGL-001',
+        asCode: 'SUN001',
         description: 'High-quality UV protection sunglasses',
+        category: 'FASHION',
+        stock: 150,
         price: 129.99,
+        imageUrls: [
+          'https://example.com/sunglasses-front.jpg',
+          'https://example.com/sunglasses-side.jpg',
+        ],
+        metadata: {
+          color: 'Black',
+          material: 'Acetate',
+          uvProtection: '100%',
+        },
       },
     }),
     prisma.product.create({
       data: {
         name: 'Designer Watch',
         sku: 'WCH-001',
+        asCode: 'WTC001',
         description: 'Luxury timepiece with leather band',
+        category: 'FASHION',
+        stock: 75,
         price: 299.99,
+        imageUrls: [
+          'https://example.com/watch-front.jpg',
+          'https://example.com/watch-back.jpg',
+        ],
+        metadata: {
+          movement: 'Quartz',
+          band: 'Leather',
+          waterResistance: '50m',
+        },
       },
     }),
     prisma.product.create({
       data: {
         name: 'Wireless Headphones',
         sku: 'HDP-001',
+        asCode: 'AUD001',
         description: 'Noise-canceling Bluetooth headphones',
+        category: 'ELECTRONICS',
+        stock: 200,
         price: 199.99,
+        imageUrls: [
+          'https://example.com/headphones-front.jpg',
+          'https://example.com/headphones-side.jpg',
+        ],
+        metadata: {
+          batteryLife: '30 hours',
+          noiseCanceling: true,
+          bluetooth: '5.0',
+        },
       },
     }),
     prisma.product.create({
       data: {
         name: 'Smartphone Case',
         sku: 'CSE-001',
+        asCode: 'CAS001',
         description: 'Protective smartphone case',
+        category: 'ELECTRONICS',
+        stock: 500,
         price: 49.99,
+        imageUrls: [
+          'https://example.com/case-clear.jpg',
+          'https://example.com/case-black.jpg',
+        ],
+        metadata: {
+          material: 'TPU',
+          protection: 'Drop-resistant',
+          colors: ['Clear', 'Black', 'Blue'],
+        },
       },
     }),
   ]);
@@ -281,9 +331,18 @@ async function main() {
       name: 'Summer Collection 2024',
       description: 'Influencer campaign for summer collection launch',
       status: 'ACTIVE',
+      type: 'REELS',
       budget: 50000,
+      budgetSpent: 12500,
+      budgetAllocated: 45000,
       startDate: new Date('2024-06-01'),
       endDate: new Date('2024-08-31'),
+      deliverableDeadline: new Date('2024-07-15'),
+      brief:
+        'Create engaging reels showcasing summer fashion pieces. Focus on lifestyle and outdoor activities.',
+      reelsRequired: 5,
+      postsRequired: 3,
+      storiesRequired: 10,
       store: { connect: { id: store1.id } },
     },
   });
@@ -293,9 +352,18 @@ async function main() {
       name: 'Holiday Season Promo',
       description: 'Year-end promotional campaign',
       status: 'DRAFT',
+      type: 'MIXED',
       budget: 75000,
+      budgetSpent: 0,
+      budgetAllocated: 70000,
       startDate: new Date('2024-11-01'),
       endDate: new Date('2024-12-31'),
+      deliverableDeadline: new Date('2024-11-30'),
+      brief:
+        'Mixed content campaign for holiday gift promotion. Include posts, stories, and reels.',
+      reelsRequired: 3,
+      postsRequired: 4,
+      storiesRequired: 8,
       store: { connect: { id: store2.id } },
     },
   });
@@ -307,25 +375,37 @@ async function main() {
         campaignId: campaign1.id,
         productId: products[0].id,
         quantity: 100,
+        plannedQty: 120,
         discount: 15,
+        notes: 'Priority items for summer campaign launch',
+        dueDate: new Date('2024-06-15'),
       },
       {
         campaignId: campaign1.id,
         productId: products[1].id,
         quantity: 50,
+        plannedQty: 60,
         discount: 10,
+        notes: 'Limited edition pieces',
+        dueDate: new Date('2024-06-20'),
       },
       {
         campaignId: campaign2.id,
         productId: products[2].id,
         quantity: 200,
+        plannedQty: 250,
         discount: 20,
+        notes: 'High-demand electronics for holiday season',
+        dueDate: new Date('2024-10-15'),
       },
       {
         campaignId: campaign2.id,
         productId: products[3].id,
         quantity: 500,
+        plannedQty: 600,
         discount: 25,
+        notes: 'Stock up for holiday gift bundles',
+        dueDate: new Date('2024-10-20'),
       },
     ],
   });
@@ -338,6 +418,9 @@ async function main() {
       rate: 5000,
       status: 'ACCEPTED',
       deliverables: '5 Instagram posts, 3 stories',
+      deliverableType: 'reel',
+      expectedDate: new Date('2024-07-10'),
+      notes: 'Focus on lifestyle content with sunglasses',
     },
   });
 
@@ -348,6 +431,9 @@ async function main() {
       rate: 7500,
       status: 'ACCEPTED',
       deliverables: '2 YouTube videos, 10 Shorts',
+      deliverableType: 'mixed',
+      expectedDate: new Date('2024-07-05'),
+      notes: 'Tech review style content for headphones',
     },
   });
 
@@ -358,6 +444,9 @@ async function main() {
       rate: 10000,
       status: 'PENDING',
       deliverables: '3 reels, sponsored content',
+      deliverableType: 'post',
+      expectedDate: new Date('2024-11-15'),
+      notes: 'High engagement fitness content',
     },
   });
 
@@ -385,6 +474,113 @@ async function main() {
       dueDate: new Date('2024-07-15'),
       description: 'Invoice for influencer compensation',
       campaign: { connect: { id: campaign1.id } },
+    },
+  });
+
+  // Create Invoice Images
+  const invoiceImage1 = await prisma.invoiceImage.create({
+    data: {
+      imagePath: '/invoices/summer-campaign-001.jpg',
+      ocrData: {
+        vendor: 'Sunshine Optics Co.',
+        invoiceNumber: 'SO-2024-0156',
+        date: '2024-06-05',
+        items: [
+          {
+            description: 'Premium Sunglasses',
+            quantity: 100,
+            unitPrice: 129.99,
+          },
+        ],
+        subtotal: 12999.0,
+        tax: 1039.92,
+        total: 14038.92,
+      },
+      extractedTotal: 14038.92,
+      status: 'PROCESSED',
+      campaign: { connect: { id: campaign1.id } },
+      product: { connect: { id: products[0].id } },
+    },
+  });
+
+  const invoiceImage2 = await prisma.invoiceImage.create({
+    data: {
+      imagePath: '/invoices/tech-gear-002.jpg',
+      ocrData: {
+        vendor: 'AudioTech Solutions',
+        invoiceNumber: 'ATS-2024-0234',
+        date: '2024-06-10',
+        items: [
+          {
+            description: 'Wireless Headphones',
+            quantity: 200,
+            unitPrice: 199.99,
+          },
+        ],
+        subtotal: 39998.0,
+        tax: 3199.84,
+        total: 43197.84,
+      },
+      extractedTotal: 43197.84,
+      status: 'PROCESSED',
+      campaign: { connect: { id: campaign2.id } },
+      product: { connect: { id: products[2].id } },
+    },
+  });
+
+  // Create Courier Shipments
+  const shipment1 = await prisma.courierShipment.create({
+    data: {
+      trackingNumber: '1Z999AA1234567890',
+      courierName: 'UPS',
+      courierCompany: 'United Parcel Service',
+      sendStore: { connect: { id: store1.id } },
+      returnStore: { connect: { id: store1.id } },
+      influencer: { connect: { id: influencers[0].id } },
+      campaign: { connect: { id: campaign1.id } },
+      sentDate: new Date('2024-06-15T09:00:00Z'),
+      receivedDate: new Date('2024-06-17T14:30:00Z'),
+      returnedDate: new Date('2024-07-20T16:00:00Z'),
+      status: 'RETURNED',
+      statusTimeline: {
+        '2024-06-15T09:00:00Z': 'SENT',
+        '2024-06-16T08:00:00Z': 'IN_TRANSIT',
+        '2024-06-17T14:30:00Z': 'DELIVERED',
+        '2024-07-20T16:00:00Z': 'RETURNED',
+      },
+    },
+  });
+
+  const shipment2 = await prisma.courierShipment.create({
+    data: {
+      trackingNumber: 'FDX123456789012',
+      courierName: 'FedEx',
+      courierCompany: 'Federal Express Corporation',
+      sendStore: { connect: { id: store2.id } },
+      influencer: { connect: { id: influencers[1].id } },
+      campaign: { connect: { id: campaign1.id } },
+      sentDate: new Date('2024-06-18T11:00:00Z'),
+      status: 'IN_TRANSIT',
+      statusTimeline: {
+        '2024-06-18T11:00:00Z': 'SENT',
+        '2024-06-19T06:00:00Z': 'IN_TRANSIT',
+      },
+    },
+  });
+
+  const shipment3 = await prisma.courierShipment.create({
+    data: {
+      trackingNumber: 'DHL987654321098',
+      courierName: 'DHL',
+      courierCompany: 'DHL Express',
+      sendStore: { connect: { id: store1.id } },
+      influencer: { connect: { id: influencers[3].id } },
+      campaign: { connect: { id: campaign2.id } },
+      sentDate: new Date('2024-10-01T10:00:00Z'),
+      status: 'PENDING',
+      statusTimeline: {
+        '2024-10-01T10:00:00Z': 'PENDING',
+      },
     },
   });
 
@@ -434,6 +630,8 @@ Seed Summary:
 - Campaign Products: 4
 - Influencer-Campaign Links: 3
 - Financial Documents: 2
+- Invoice Images: 2
+- Courier Shipments: 3
 - Apify Run Logs: 1
 - Analytics Snapshots: 1
   `);

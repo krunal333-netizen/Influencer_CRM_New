@@ -2,11 +2,12 @@
 
 ## Overview
 
-This document provides guidance on working with the Prisma-based data layer in the Influencer CRM backend.
+This document provides guidance on working with the Prisma-based data layer in the Influencer CRM backend. This includes Module 2 enhancements with campaign types, product categories, invoice image OCR processing, and courier shipment tracking.
 
 ## Setup Instructions
 
 ### Prerequisites
+
 - Node.js (v18+)
 - PostgreSQL (v12+)
 - pnpm (v8+)
@@ -14,22 +15,26 @@ This document provides guidance on working with the Prisma-based data layer in t
 ### Installation
 
 1. **Install dependencies**:
+
    ```bash
    pnpm install
    ```
 
 2. **Configure environment**:
    Copy `.env.example` to `.env.local` and update the `DATABASE_URL`:
+
    ```bash
    cp backend/.env.example backend/.env.local
    ```
 
 3. **Generate Prisma Client**:
+
    ```bash
    pnpm backend prisma generate
    ```
 
 4. **Run migrations**:
+
    ```bash
    pnpm backend prisma migrate dev
    ```
@@ -50,6 +55,7 @@ pnpm backend prisma migrate dev --name describe_your_changes
 ```
 
 This will:
+
 1. Create the migration in `backend/prisma/migrations/`
 2. Run the migration against the database
 3. Generate an updated Prisma Client
@@ -206,12 +212,12 @@ export class CampaignService {
   async createCampaignWithInfluencers(campaignData, influencerIds) {
     // Business logic for campaign creation
     const campaign = await this.campaignRepository.create(campaignData);
-    
+
     // Add influencers
     for (const influencerId of influencerIds) {
       await this.campaignRepository.addInfluencer(campaign.id, influencerId);
     }
-    
+
     return campaign;
   }
 
@@ -232,6 +238,7 @@ export class CampaignService {
 For testing, consider using:
 
 1. **SQLite** (lightweight, in-memory):
+
    ```env
    DATABASE_URL="file:./test.db"
    ```
@@ -248,10 +255,10 @@ For testing, consider using:
 
 ### Find with Pagination
 
-```javascript
+````javascript
 async function getPaginatedCampaigns(page = 1, pageSize = 10) {
   const skip = (page - 1) * pageSize;
-  
+
   const [campaigns, total] = await Promise.all([
     prisma.campaign.findMany({
       skip,
@@ -271,6 +278,218 @@ async function getPaginatedCampaigns(page = 1, pageSize = 10) {
     },
   };
 }
+
+// Module 2: New Query Examples
+
+### Working with Campaign Types and Budget Tracking
+
+```javascript
+// Find campaigns by type with budget tracking
+const reelsCampaigns = await prisma.campaign.findMany({
+  where: {
+    type: 'REELS',
+    status: 'ACTIVE'
+  },
+  include: {
+    products: {
+      include: { product: true }
+    },
+    influencerLinks: {
+      include: { influencer: true }
+    }
+  }
+});
+
+// Get budget utilization for campaigns
+const budgetAnalysis = await prisma.campaign.findMany({
+  select: {
+    name: true,
+    budget: true,
+    budgetSpent: true,
+    budgetAllocated: true,
+    type: true
+  },
+  where: {
+    budget: { not: null }
+  }
+});
+````
+
+### Working with Enhanced Products
+
+```javascript
+// Find products by category with images and metadata
+const fashionProducts = await prisma.product.findMany({
+  where: { category: 'FASHION' },
+  include: {
+    campaignProducts: {
+      include: {
+        campaign: {
+          select: { name: true, status: true },
+        },
+      },
+    },
+  },
+});
+
+// Search products with metadata filtering
+const productsWithStock = await prisma.product.findMany({
+  where: {
+    stock: { gt: 0 },
+    OR: [
+      { name: { contains: searchTerm } },
+      { asCode: { equals: searchTerm } },
+    ],
+  },
+});
+```
+
+### Working with Invoice Images and OCR Data
+
+```javascript
+// Get processed invoice images with extracted totals
+const processedInvoices = await prisma.invoiceImage.findMany({
+  where: { status: 'PROCESSED' },
+  include: {
+    campaign: true,
+    product: true,
+  },
+  orderBy: { createdAt: 'desc' },
+});
+
+// Process new invoice image
+const newInvoice = await prisma.invoiceImage.create({
+  data: {
+    imagePath: '/invoices/new-invoice.jpg',
+    status: 'PENDING',
+    campaign: { connect: { id: campaignId } },
+    product: { connect: { id: productId } },
+  },
+});
+
+// Update with OCR results
+const updatedInvoice = await prisma.invoiceImage.update({
+  where: { id: invoiceId },
+  data: {
+    status: 'PROCESSED',
+    ocrData: {
+      vendor: 'Acme Corp',
+      invoiceNumber: 'INV-2024-001',
+      items: [{ description: 'Product A', quantity: 10, unitPrice: 25.99 }],
+      subtotal: 259.9,
+      tax: 20.79,
+      total: 280.69,
+    },
+    extractedTotal: 280.69,
+  },
+});
+```
+
+### Working with Courier Shipments
+
+```javascript
+// Track shipments by status
+const activeShipments = await prisma.courierShipment.findMany({
+  where: {
+    status: { in: ['SENT', 'IN_TRANSIT'] },
+  },
+  include: {
+    influencer: true,
+    campaign: true,
+    sendStore: true,
+  },
+  orderBy: { sentDate: 'desc' },
+});
+
+// Get complete shipment timeline
+const shipmentWithTimeline = await prisma.courierShipment.findUnique({
+  where: { trackingNumber: '1Z999AA1234567890' },
+  include: {
+    influencer: true,
+    campaign: true,
+    sendStore: true,
+    returnStore: true,
+  },
+});
+
+// Update shipment status with timeline
+await prisma.courierShipment.update({
+  where: { id: shipmentId },
+  data: {
+    status: 'DELIVERED',
+    receivedDate: new Date(),
+    statusTimeline: {
+      '2024-06-15T09:00:00Z': 'SENT',
+      '2024-06-16T08:00:00Z': 'IN_TRANSIT',
+      '2024-06-17T14:30:00Z': 'DELIVERED',
+    },
+  },
+});
+```
+
+### Enhanced Influencer Campaign Links
+
+```javascript
+// Get influencer deliverables with expected dates
+const influencerDeliverables = await prisma.influencerCampaignLink.findMany({
+  where: {
+    expectedDate: { gte: new Date() },
+  },
+  include: {
+    influencer: true,
+    campaign: true,
+  },
+  orderBy: { expectedDate: 'asc' },
+});
+
+// Find campaigns by deliverable type
+const reelsContent = await prisma.influencerCampaignLink.findMany({
+  where: { deliverableType: 'reel' },
+  include: {
+    influencer: true,
+    campaign: {
+      include: {
+        store: true,
+      },
+    },
+  },
+});
+```
+
+### Complex Campaign Analytics
+
+```javascript
+// Campaign performance with new metrics
+const campaignAnalytics = await prisma.campaign.findMany({
+  include: {
+    store: true,
+    products: {
+      include: { product: true },
+    },
+    influencerLinks: {
+      include: { influencer: true },
+    },
+    invoiceImages: true,
+    courierShipments: true,
+  },
+});
+
+// Calculate budget utilization
+const budgetUtilization = campaignAnalytics.map((campaign) => ({
+  name: campaign.name,
+  budget: campaign.budget,
+  budgetSpent: campaign.budgetSpent,
+  utilization: campaign.budget
+    ? (((campaign.budgetSpent || 0) / campaign.budget) * 100).toFixed(2) + '%'
+    : 'N/A',
+  type: campaign.type,
+  activeInfluencers: campaign.influencerLinks.filter(
+    (link) => link.status === 'ACCEPTED'
+  ).length,
+  pendingShipments: campaign.courierShipments.filter(
+    (s) => s.status !== 'DELIVERED'
+  ).length,
+}));
 ```
 
 ### Bulk Operations
@@ -317,6 +536,7 @@ await prisma.$transaction(async (tx) => {
 ### Migration Issues
 
 **Problem**: Migration failed to apply
+
 ```bash
 # Check migration status
 pnpm backend prisma migrate status
@@ -328,6 +548,7 @@ pnpm backend prisma migrate resolve --rolled-back <migration_name>
 ### Prisma Client Stale
 
 **Problem**: Changes not reflected in IDE
+
 ```bash
 # Regenerate Prisma Client
 pnpm backend prisma generate
@@ -336,6 +557,7 @@ pnpm backend prisma generate
 ### Database Connection Issues
 
 **Problem**: Cannot connect to database
+
 1. Verify `DATABASE_URL` in `.env.local`
 2. Ensure PostgreSQL is running
 3. Check database user permissions
@@ -360,6 +582,7 @@ pnpm backend prisma generate
    - Provides type safety and validation
 
 5. **Handle errors gracefully**
+
    ```javascript
    try {
      const user = await prisma.user.findUnique({
@@ -387,6 +610,7 @@ pnpm backend prisma generate
 ## Performance Tips
 
 1. **Use select instead of include when possible**
+
    ```javascript
    // More efficient if you only need specific fields
    await prisma.user.findUnique({
@@ -396,6 +620,7 @@ pnpm backend prisma generate
    ```
 
 2. **Batch operations**
+
    ```javascript
    // Use createMany instead of multiple create calls
    await prisma.product.createMany({
