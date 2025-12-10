@@ -1,34 +1,89 @@
 # Influencer CRM
 
-A comprehensive Customer Relationship Management (CRM) system designed for managing influencer marketing campaigns, financial documents, and analytics.
+A comprehensive Customer Relationship Management (CRM) system designed for managing influencer marketing campaigns, financial documents, and analytics. Built with Next.js 14, NestJS 10, TypeScript, and PostgreSQL.
 
-## Project Structure
+## 🚀 Tech Stack
+
+### Frontend
+- **Next.js 14** - React framework with App Router
+- **React 18** - UI library
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first CSS framework
+- **React Query** - Data fetching and caching
+- **React Hook Form + Zod** - Form validation
+
+### Backend
+- **NestJS 10** - Progressive Node.js framework
+- **TypeScript** - Type-safe development
+- **Prisma ORM** - Modern database toolkit
+- **PostgreSQL** - Relational database
+- **Swagger** - API documentation
+- **JWT + Argon2** - Authentication and password hashing
+- **Passport** - Authentication middleware
+
+### DevOps & Tooling
+- **pnpm** - Fast, disk space efficient package manager
+- **Turborepo** - Monorepo build system
+- **Docker & Docker Compose** - Containerization
+- **Husky & lint-staged** - Git hooks and pre-commit checks
+- **Jest** - Testing framework
+- **ESLint & Prettier** - Code quality and formatting
+
+## 📁 Project Structure
 
 ```
 .
-├── backend/                      # Backend service (Node.js + Prisma + PostgreSQL)
+├── backend/                      # Backend service (NestJS 10 + Prisma + PostgreSQL)
+│   ├── src/
+│   │   ├── auth/                # Authentication module (JWT + Argon2)
+│   │   ├── users/               # User management
+│   │   ├── influencers/         # Influencer CRUD + stage transitions
+│   │   ├── campaigns/           # Campaign management
+│   │   ├── products/            # Product catalog
+│   │   ├── firms/               # Firm administration
+│   │   ├── stores/              # Store management
+│   │   ├── financial-documents/ # Financial document handling
+│   │   ├── apify/               # Instagram scraping integration
+│   │   ├── prisma/              # Prisma service module
+│   │   └── common/              # Common utilities and decorators
 │   ├── prisma/
 │   │   ├── schema.prisma        # Database schema definition
 │   │   ├── seed.js              # Database seed script
-│   │   ├── migrations/          # Database migrations
-│   │   └── .prismarc.json       # Prisma configuration
+│   │   └── migrations/          # Database migrations
 │   ├── package.json
-│   ├── .env.example
-│   └── .env.local
+│   ├── .env                     # Dev environment (tracked)
+│   └── .env.example             # Environment template
+├── frontend/                     # Frontend application (React + Vite + Tailwind)
+│   ├── src/
+│   │   ├── pages/               # Route pages
+│   │   ├── components/          # React components
+│   │   ├── lib/                 # Utility functions
+│   │   ├── hooks/               # Custom React hooks
+│   │   └── contexts/            # React contexts
+│   └── package.json
+├── packages/
+│   ├── eslint-config/           # Shared ESLint configuration
+│   ├── tsconfig/                # Shared TypeScript configurations
+│   ├── ui/                      # Shared UI components
+│   └── utils/                   # Shared utilities
 ├── docs/
 │   ├── ER_DIAGRAM.md            # Entity-Relationship Diagram & Schema Documentation
 │   ├── DATA_LAYER.md            # Data Layer Setup & Usage Guide
-│   └── README.md
+│   └── AUTH_FLOW.md             # Authentication flow documentation
+├── docker-compose.yml           # Development environment
+├── turbo.json                   # Turborepo configuration
+├── package.json                 # Root workspace configuration
+├── pnpm-workspace.yaml          # Workspace definition
 └── README.md                    # This file
 ```
 
-## Quick Start
+## 🛠️ Quick Start
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
-- PostgreSQL (v12 or higher)
-- pnpm (v8 or higher)
+- **Node.js** (v18 or higher)
+- **pnpm** (v8 or higher)
+- **PostgreSQL** (v12 or higher) - or use Docker Compose
 
 ### Installation
 
@@ -39,10 +94,10 @@ A comprehensive Customer Relationship Management (CRM) system designed for manag
 
 2. **Configure environment variables**:
    ```bash
-   cp backend/.env.example backend/.env.local
+   cp backend/.env.example backend/.env
    ```
    
-   Edit `backend/.env.local` and set your PostgreSQL connection string:
+   Edit `backend/.env` and set your PostgreSQL connection string:
    ```env
    DATABASE_URL="postgresql://user:password@localhost:5432/influencer_crm_dev"
    ```
@@ -57,7 +112,80 @@ A comprehensive Customer Relationship Management (CRM) system designed for manag
    pnpm backend prisma db seed
    ```
 
-## Authentication API Overview
+5. **Start the development servers**:
+   ```bash
+   pnpm dev
+   ```
+   This will start:
+   - Frontend: http://localhost:5173
+   - Backend: http://localhost:3000
+   - API Docs: http://localhost:3000/api
+
+### Docker Development
+
+For a complete containerized development environment:
+
+```bash
+# Start all services
+docker-compose up
+
+# Or start specific services
+docker-compose up postgres backend
+docker-compose up frontend
+```
+
+## 📜 Available Scripts
+
+### Root Level Scripts
+
+```bash
+pnpm dev          # Start both frontend and backend in development
+pnpm build        # Build all applications and packages
+pnpm test         # Run all tests
+pnpm lint         # Lint all packages
+pnpm lint:fix     # Fix linting issues
+pnpm format       # Format code with Prettier
+pnpm type-check   # Type check all TypeScript files
+pnpm clean        # Clean build artifacts
+
+# Backend shortcuts
+pnpm backend      # Access backend scripts (e.g., pnpm backend start:dev)
+pnpm prisma       # Access Prisma CLI (e.g., pnpm prisma migrate dev)
+pnpm migrate      # Run database migrations
+```
+
+### Backend Scripts
+
+```bash
+cd backend
+
+pnpm start:dev    # Start backend in development mode
+pnpm build        # Build for production
+pnpm start        # Start production build
+pnpm test         # Run tests
+pnpm lint         # Lint backend code
+pnpm lint:fix     # Fix linting issues
+
+# Prisma commands
+pnpm prisma migrate dev     # Create and apply migrations
+pnpm prisma generate        # Generate Prisma Client
+pnpm prisma studio          # Open Prisma Studio
+pnpm prisma db seed         # Seed database
+```
+
+### Frontend Scripts
+
+```bash
+cd frontend
+
+pnpm dev          # Start frontend dev server (http://localhost:5173)
+pnpm build        # Build for production
+pnpm preview      # Preview production build
+pnpm lint         # Lint frontend code
+pnpm lint:fix     # Fix linting issues
+```
+
+## 🔐 Authentication API Overview
 
 The backend now exposes a NestJS-powered authentication service that handles user onboarding, login, refresh-token rotation, and role-protected profile access. Passwords and refresh tokens are hashed with Argon2 and refresh tokens are stored as HTTP-only cookies to prevent JavaScript access.
 
@@ -77,15 +205,15 @@ Tokens are delivered via the `access_token` and `refresh_token` cookies (HTTP-on
 
 ```bash
 # watch mode
-pnpm --filter @influencer-crm/backend start:dev
+pnpm backend start:dev
 
 # production build
-pnpm --filter @influencer-crm/backend build && pnpm --filter @influencer-crm/backend start
+pnpm backend build && pnpm backend start
 ```
 
-## Frontend (React + Tailwind)
+## 🎨 Frontend (React + Tailwind)
 
-A small React client (Vite + TypeScript) demonstrates the auth flow with React Query mutations, React Hook Form + Zod validation, Tailwind styling, and an auth context that gates protected routes.
+A React client (Vite + TypeScript) demonstrates the auth flow with React Query mutations, React Hook Form + Zod validation, Tailwind styling, and an auth context that gates protected routes.
 
 ```bash
 pnpm --filter @influencer-crm/frontend dev   # http://localhost:5173
@@ -109,11 +237,11 @@ Key features:
 | `JWT_ACCESS_EXPIRES_IN` / `JWT_REFRESH_EXPIRES_IN` | Human-friendly TTL strings (`15m`, `7d`, etc.). |
 | `APIFY_API_KEY` | Optional Apify API key for Instagram scraping. Leave empty for dry-run mode only. |
 
-### Apify Instagram Scraping Integration
+## 🔌 Apify Instagram Scraping Integration
 
 The system includes optional Instagram profile scraping via Apify to automatically populate influencer data.
 
-#### Setup Instructions
+### Setup Instructions
 
 1. **Get Apify API Key** (optional):
    - Sign up at [Apify](https://apify.com/)
@@ -131,7 +259,7 @@ The system includes optional Instagram profile scraping via Apify to automatical
    - Returns mock data for testing
    - Perfect for development and demos
 
-#### Available Endpoints
+### Available Endpoints
 
 | Method | Path | Description |
 | ------ | ---- | ----------- |
@@ -139,7 +267,7 @@ The system includes optional Instagram profile scraping via Apify to automatical
 | GET | `/apify/run/:runId/status` | Check scrape job status |
 | GET | `/apify/run/:runId/results` | Get scraped profile data |
 
-#### Usage Examples
+### Usage Examples
 
 **Start a scrape job (dry-run):**
 ```bash
@@ -182,7 +310,7 @@ curl -X POST http://localhost:3000/influencers/from-scraped-data \
   }'
 ```
 
-#### Features
+### Features
 
 - ✅ **Dry-run mode**: Test without API credentials
 - ✅ **Auto-population**: Name, email, followers, bio from Instagram
@@ -191,142 +319,106 @@ curl -X POST http://localhost:3000/influencers/from-scraped-data \
 - ✅ **Error handling**: Comprehensive error responses
 - ✅ **Swagger docs**: Complete API documentation at `/api`
 
-#### Integration with Influencer Creation
+### Integration with Influencer Creation
 
 The influencer creation flow can automatically trigger Instagram scraping when a profile URL is provided, populating fields like:
 - Profile Name (fullName)
 - Followers Count
 - Email (extracted from bio/email scraper)
-- Bio
-- Profile Avatar URL
+- Biography
+- Profile Picture URL
 
-See [`docs/AUTH_FLOW.md`](./docs/AUTH_FLOW.md) for a deeper dive into request/response examples, Thunder Client snippets, and troubleshooting tips.
+## 📚 Documentation
 
-## Data Layer
+For detailed documentation on specific topics, refer to:
 
-The backend uses **Prisma ORM** with **PostgreSQL** to manage data. The schema includes:
+- **[ER Diagram](docs/ER_DIAGRAM.md)** - Entity-Relationship Diagram and Schema Documentation
+- **[Data Layer](docs/DATA_LAYER.md)** - Data Layer Setup and Usage Guide
+- **[Auth Flow](docs/AUTH_FLOW.md)** - Authentication Flow Documentation
+- **[API Implementation](API_IMPLEMENTATION.md)** - Comprehensive API Documentation
+- **[Dashboard Implementation](DASHBOARD_IMPLEMENTATION.md)** - Frontend Dashboard Documentation
+- **[ESLint Setup](ESLINT_SETUP.md)** - ESLint Configuration Guide
 
-### Core Entities
+## 🗄️ Database Schema
 
-- **User Management**: Users, Roles, Permissions
-- **Organization**: Firms, Stores
-- **Products**: Product catalog with SKU tracking
-- **Influencers**: Profile management with status tracking (COLD, ACTIVE, FINAL)
-- **Campaigns**: Marketing campaigns linked to stores
-- **Campaign Products**: Products associated with campaigns (many-to-many)
-- **Influencer-Campaign Links**: Collaboration tracking between influencers and campaigns
-- **Financial Documents**: PO, Invoices, and Form metadata
-- **Apify Integration**: Web scraping task execution logs
-- **Analytics**: Periodic snapshots of key metrics
+The system includes 13 core tables:
+
+1. **users** - User accounts with RBAC
+2. **roles** - Role definitions
+3. **permissions** - Permission definitions
+4. **firms** - Organizations
+5. **stores** - Store locations within firms
+6. **products** - Product catalog
+7. **influencers** - Influencer profiles (with status tracking)
+8. **campaigns** - Marketing campaigns
+9. **campaign_products** - M:M linking campaigns to products
+10. **influencer_campaign_links** - M:M linking influencers to campaigns
+11. **financial_documents** - POs, invoices, forms
+12. **apify_run_logs** - Web scraping task logs
+13. **analytics_snapshots** - Periodic metrics snapshots
+
+Plus 2 junction tables for M:N relationships (roles-users, permissions-roles).
 
 ### Key Features
 
-✅ **Type-safe**: Full TypeScript support through Prisma Client
-✅ **Relational**: Complex relationships with cascade deletes
-✅ **Indexed**: Strategic indices for query performance
-✅ **Seeded**: Reference data included in seed script
-✅ **Documented**: Comprehensive ER diagram and schema documentation
+- Uses CUID for primary keys
+- Three enums: `InfluencerStatus` (COLD/ACTIVE/FINAL), `FinancialDocumentType` (PO/INVOICE/FORM)
+- Many-to-many relationships use junction tables
+- Strategic indices on foreign keys, status fields, and frequently queried columns
+- Cascade deletes on parent-child relationships
 
-### Common Commands
+## 🧪 Testing
 
 ```bash
-# Generate Prisma Client
-pnpm backend prisma generate
+# Run all tests
+pnpm test
 
-# Run migrations
-pnpm backend prisma migrate dev
+# Run backend tests
+pnpm backend test
 
-# Create new migration
-pnpm backend prisma migrate dev --name your_migration_name
+# Run backend E2E tests
+pnpm backend test -- --testPathPattern="e2e-spec"
 
-# Seed database
-pnpm backend prisma db seed
-
-# Open Prisma Studio (interactive database viewer)
-pnpm backend prisma studio
-
-# Reset database (⚠️ destructive)
-pnpm backend prisma migrate reset
+# Run frontend tests
+pnpm frontend test
 ```
 
-## Documentation
+## 🔍 Linting & Formatting
 
-- **[Entity-Relationship Diagram](/docs/ER_DIAGRAM.md)**: Complete schema structure, relationships, and data model
-- **[Data Layer Guide](/docs/DATA_LAYER.md)**: Setup instructions, usage patterns, and best practices
+```bash
+# Lint all packages
+pnpm lint
 
-## Schema Overview
+# Fix linting issues
+pnpm lint:fix
 
-### User Management Layer
-- Multi-tenant user support with role-based access control (RBAC)
-- Granular permission system
-- Firm-scoped user management
+# Format code
+pnpm format
 
-### Campaign Management Layer
-- Store-based campaign organization
-- Product associations with quantities and discounts
-- Influencer collaboration tracking with status management
-- Budget and date-based campaign planning
-
-### Financial Operations Layer
-- Financial document tracking (PO, Invoice, Forms)
-- Status tracking for payment workflows
-- Metadata and file storage support
-- Campaign-linked financial tracking
-
-### Analytics & Operations Layer
-- Apify web scraping integration logs
-- Periodic analytics snapshots
-- Influencer status distribution metrics
-- Campaign performance baseline data
-
-## Database Relationships
-
-Key relationships at a glance:
-
-```
-Firm (1:N)→ Store (1:N)→ Campaign (1:N)→ FinancialDocument
-         ↘ User ↙
-
-Campaign (1:N)→ Product (M:M via CampaignProduct)
-             ↘ Influencer (M:M via InfluencerCampaignLink)
-
-User (M:N)→ Role (M:N)→ Permission
+# Check formatting
+pnpm format:check
 ```
 
-For detailed relationships, see [ER Diagram](/docs/ER_DIAGRAM.md).
+## 🏗️ Building for Production
 
-## Development
+```bash
+# Build all packages
+pnpm build
 
-### Project Conventions
+# Build backend only
+pnpm backend build
 
-- **Code Style**: Follow existing patterns in the codebase
-- **Naming**: CamelCase for files/classes, snake_case for database columns
-- **Commits**: Use conventional commit messages
-- **Testing**: Unit tests for business logic, integration tests for database queries
+# Build frontend only
+pnpm frontend build
+```
 
-### Adding New Entities
+## 🤝 Contributing
 
-1. Update `backend/prisma/schema.prisma`
-2. Run `pnpm backend prisma migrate dev --name add_new_entity`
-3. Update seed data in `backend/prisma/seed.js` if needed
-4. Implement repository/service layer for the entity
-5. Update documentation in `/docs`
+1. Create a feature branch from `main`
+2. Make your changes
+3. Run tests and linting
+4. Submit a pull request
 
-## Acceptance Criteria
+## 📄 License
 
-✅ `pnpm backend prisma migrate dev` succeeds
-✅ Schema reflects all required entities with proper relations and indices
-✅ Seed data creates reference entities (roles, permissions, sample data)
-✅ ER diagram documented in `/docs/ER_DIAGRAM.md`
-✅ Data layer guide provided in `/docs/DATA_LAYER.md`
-
-## Support
-
-For issues or questions:
-1. Check [Data Layer Guide](/docs/DATA_LAYER.md) for troubleshooting
-2. Review [ER Diagram](/docs/ER_DIAGRAM.md) for schema questions
-3. Consult [Prisma Documentation](https://www.prisma.io/docs/)
-
-## License
-
-Private repository. All rights reserved.
+This project is proprietary and confidential.
