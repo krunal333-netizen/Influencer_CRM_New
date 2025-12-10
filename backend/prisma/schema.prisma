@@ -92,6 +92,8 @@ model Store {
   firmId    String
   
   campaigns Campaign[]
+  sentShipments CourierShipment[] @relation("SendStore")
+  returnedShipments CourierShipment[] @relation("ReturnStore")
   
   @@index([firmId])
   @@map("stores")
@@ -99,16 +101,33 @@ model Store {
 
 // ===== Products =====
 
+enum ProductCategory {
+  ELECTRONICS
+  FASHION
+  BEAUTY
+  LIFESTYLE
+  FITNESS
+  HOME
+  FOOD
+  OTHER
+}
+
 model Product {
-  id        String   @id @default(cuid())
-  name      String
-  sku       String   @unique
+  id          String          @id @default(cuid())
+  name        String
+  sku         String          @unique
+  asCode      String?         @unique // Alternative unique code for products
   description String?
-  price     Decimal  @db.Decimal(10, 2)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  category    ProductCategory @default(OTHER)
+  stock       Int             @default(0)
+  price       Decimal         @db.Decimal(10, 2)
+  imageUrls   Json?           // Array of image URLs
+  metadata    Json?           // Additional product metadata
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
   
   campaignProducts CampaignProduct[]
+  invoiceImages      InvoiceImage[]
   
   @@map("products")
 }
@@ -135,42 +154,82 @@ model Influencer {
   updatedAt DateTime          @updatedAt
   
   campaignLinks InfluencerCampaignLink[]
+  courierShipments CourierShipment[]
   
   @@index([status])
   @@map("influencers")
 }
 
+// ===== Enums =====
+
+enum CampaignType {
+  REELS
+  POSTS
+  STORIES
+  MIXED
+}
+
+enum CourierStatus {
+  PENDING
+  SENT
+  IN_TRANSIT
+  DELIVERED
+  RETURNED
+  FAILED
+}
+
+enum InvoiceImageStatus {
+  PENDING
+  PROCESSING
+  PROCESSED
+  FAILED
+}
+
 // ===== Campaigns =====
 
 model Campaign {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  status      String   @default("DRAFT") // DRAFT, ACTIVE, COMPLETED, CANCELLED
-  budget      Decimal? @db.Decimal(12, 2)
-  startDate   DateTime?
-  endDate     DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String       @id @default(cuid())
+  name             String
+  description      String?
+  status           String       @default("DRAFT") // DRAFT, ACTIVE, COMPLETED, CANCELLED
+  type             CampaignType @default(MIXED)
+  budget           Decimal?     @db.Decimal(12, 2)
+  budgetSpent      Decimal?     @db.Decimal(12, 2) @default(0)
+  budgetAllocated  Decimal?     @db.Decimal(12, 2)
+  startDate        DateTime?
+  endDate          DateTime?
+  deliverableDeadline DateTime?
+  brief           String?       // Campaign brief/requirements
+  reelsRequired    Int?         @default(0)
+  postsRequired    Int?         @default(0)
+  storiesRequired  Int?         @default(0)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
   
-  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  storeId     String
+  store            Store        @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId          String
   
   products           CampaignProduct[]
   influencerLinks    InfluencerCampaignLink[]
   financialDocuments FinancialDocument[]
+  invoiceImages      InvoiceImage[]
+  courierShipments   CourierShipment[]
   
   @@index([storeId])
   @@index([status])
+  @@index([type])
   @@map("campaigns")
 }
 
 model CampaignProduct {
-  id          String   @id @default(cuid())
-  quantity    Int
-  discount    Decimal? @db.Decimal(5, 2)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  quantity  Int
+  plannedQty Int?    // Planned quantity for future reference
+  discount  Decimal? @db.Decimal(5, 2)
+  notes     String?  // Additional notes for campaign-product relationship
+  dueDate   DateTime? // Due date for product delivery
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   
   campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   campaignId  String
@@ -186,17 +245,20 @@ model CampaignProduct {
 // ===== Influencer-Campaign Links =====
 
 model InfluencerCampaignLink {
-  id            String   @id @default(cuid())
-  rate          Decimal  @db.Decimal(10, 2)
-  status        String   @default("PENDING") // PENDING, ACCEPTED, REJECTED, COMPLETED
-  deliverables  String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id              String   @id @default(cuid())
+  rate            Decimal  @db.Decimal(10, 2)
+  status          String   @default("PENDING") // PENDING, ACCEPTED, REJECTED, COMPLETED
+  deliverables    String?
+  deliverableType String?  // e.g., "reel", "post", "story"
+  expectedDate    DateTime? // Expected delivery date for deliverables
+  notes          String?   // Additional notes for the collaboration
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
   
-  influencer    Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
-  influencerId  String
-  campaign      Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  campaignId    String
+  influencer      Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  influencerId    String
+  campaign        Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaignId      String
   
   @@unique([influencerId, campaignId])
   @@index([influencerId])
@@ -235,6 +297,58 @@ model FinancialDocument {
   @@index([type])
   @@index([status])
   @@map("financial_documents")
+}
+
+// ===== Invoice Images =====
+
+model InvoiceImage {
+  id            String             @id @default(cuid())
+  imagePath     String             // Path to stored invoice image
+  ocrData       Json?              // OCR extracted text/data
+  extractedTotal Decimal?          @db.Decimal(10, 2) // Total amount extracted from OCR
+  status        InvoiceImageStatus @default(PENDING)
+  campaign      Campaign?          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaignId    String?
+  product       Product?           @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productId     String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  
+  @@index([campaignId])
+  @@index([productId])
+  @@index([status])
+  @@map("invoice_images")
+}
+
+// ===== Courier Shipments =====
+
+model CourierShipment {
+  id            String        @id @default(cuid())
+  trackingNumber String       @unique
+  courierName   String        // e.g., UPS, FedEx, DHL
+  courierCompany String       // Full company name
+  sendStore     Store?        @relation("SendStore", fields: [sendStoreId], references: [id], onDelete: SetNull)
+  sendStoreId   String?
+  returnStore   Store?        @relation("ReturnStore", fields: [returnStoreId], references: [id], onDelete: SetNull)
+  returnStoreId String?
+  influencer    Influencer?   @relation(fields: [influencerId], references: [id], onDelete: SetNull)
+  influencerId  String?
+  campaign      Campaign?     @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  campaignId    String?
+  sentDate      DateTime?
+  receivedDate  DateTime?
+  returnedDate  DateTime?
+  status        CourierStatus @default(PENDING)
+  statusTimeline Json?        // JSON object tracking status changes over time
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  @@index([campaignId])
+  @@index([influencerId])
+  @@index([sendStoreId])
+  @@index([returnStoreId])
+  @@index([status])
+  @@map("courier_shipments")
 }
 
 // ===== Apify Integration =====
