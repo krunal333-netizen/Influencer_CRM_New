@@ -8,6 +8,8 @@ import ProductsPage from './pages/ProductsPage';
 import StoresPage from './pages/StoresPage';
 import FinancialPage from './pages/FinancialPage';
 import AnalyticsPage from './pages/AnalyticsPage';
+import InvoicesPage from './pages/InvoicesPage';
+import CourierPage from './pages/CourierPage';
 import ProtectedRoute from './routes/ProtectedRoute';
 
 const App = () => {
@@ -69,6 +71,22 @@ const App = () => {
         element={
           <ProtectedRoute>
             <AnalyticsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard/invoices"
+        element={
+          <ProtectedRoute>
+            <InvoicesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard/courier"
+        element={
+          <ProtectedRoute>
+            <CourierPage />
           </ProtectedRoute>
         }
       />

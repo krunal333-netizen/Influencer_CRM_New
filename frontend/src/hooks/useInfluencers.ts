@@ -2,11 +2,20 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Influencer } from '../types/models';
 import apiClient from '../api/client';
 
-export const useInfluencers = () => {
+export interface InfluencerFilters {
+  limit?: number;
+  status?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
+
+export const useInfluencers = (filters?: InfluencerFilters) => {
   return useQuery({
-    queryKey: ['influencers'],
+    queryKey: ['influencers', filters],
     queryFn: async () => {
-      const { data } = await apiClient.get<Influencer[]>('/influencers');
+      const { data } = await apiClient.get<Influencer[]>('/influencers', {
+        params: filters,
+      });
       return data;
     },
   });
@@ -27,8 +36,13 @@ export const useCreateInfluencer = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (influencer: Omit<Influencer, 'id' | 'createdAt' | 'updatedAt'>) => {
-      const { data } = await apiClient.post<Influencer>('/influencers', influencer);
+    mutationFn: async (
+      influencer: Omit<Influencer, 'id' | 'createdAt' | 'updatedAt'>
+    ) => {
+      const { data } = await apiClient.post<Influencer>(
+        '/influencers',
+        influencer
+      );
       return data;
     },
     onSuccess: () => {
@@ -42,7 +56,10 @@ export const useUpdateInfluencer = () => {
 
   return useMutation({
     mutationFn: async ({ id, ...influencer }: Influencer) => {
-      const { data } = await apiClient.put<Influencer>(`/influencers/${id}`, influencer);
+      const { data } = await apiClient.put<Influencer>(
+        `/influencers/${id}`,
+        influencer
+      );
       return data;
     },
     onSuccess: (data) => {

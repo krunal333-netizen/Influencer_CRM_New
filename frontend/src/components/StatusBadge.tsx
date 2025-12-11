@@ -4,7 +4,14 @@ interface StatusBadgeProps {
   status: string;
 }
 
-type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning' | 'info';
+type BadgeVariant =
+  | 'default'
+  | 'secondary'
+  | 'destructive'
+  | 'outline'
+  | 'success'
+  | 'warning'
+  | 'info';
 
 export default function StatusBadge({ status }: StatusBadgeProps) {
   const getVariant = (status: string): BadgeVariant => {
@@ -23,6 +30,10 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
         return 'destructive';
       case 'PENDING':
         return 'warning';
+      case 'PROCESSING':
+        return 'info';
+      case 'PROCESSED':
+        return 'success';
       case 'ACCEPTED':
         return 'success';
       case 'REJECTED':
@@ -37,6 +48,14 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
         return 'success';
       case 'FAILED':
         return 'destructive';
+      case 'SENT':
+        return 'info';
+      case 'IN_TRANSIT':
+        return 'info';
+      case 'DELIVERED':
+        return 'success';
+      case 'RETURNED':
+        return 'warning';
       default:
         return 'default';
     }
@@ -49,9 +68,5 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
       .join(' ');
   };
 
-  return (
-    <Badge variant={getVariant(status)}>
-      {formatLabel(status)}
-    </Badge>
-  );
+  return <Badge variant={getVariant(status)}>{formatLabel(status)}</Badge>;
 }
