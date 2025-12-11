@@ -57,6 +57,8 @@ export interface Campaign {
   products?: CampaignProduct[];
   influencerLinks?: InfluencerCampaignLink[];
   financialDocuments?: FinancialDocument[];
+  invoiceImages?: InvoiceImage[];
+  courierShipments?: CourierShipment[];
   createdAt: string;
   updatedAt: string;
 }
@@ -205,4 +207,54 @@ export interface CsvImportResult<T> {
     row: number;
     error: string;
   }>;
+}
+
+export interface InvoiceImage {
+  id: string;
+  imagePath: string;
+  ocrData?: Record<string, unknown> | null;
+  extractedTotal?: string | null; // Decimal as string
+  status: 'PENDING' | 'PROCESSING' | 'PROCESSED' | 'FAILED';
+  campaignId?: string | null;
+  campaign?: Campaign;
+  productId?: string | null;
+  product?: Product;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CourierShipment {
+  id: string;
+  trackingNumber: string;
+  courierName: string;
+  courierCompany: string;
+  sendStoreId?: string | null;
+  sendStore?: Store;
+  returnStoreId?: string | null;
+  returnStore?: Store;
+  influencerId?: string | null;
+  influencer?: Influencer;
+  campaignId?: string | null;
+  campaign?: Campaign;
+  sentDate?: string | null;
+  receivedDate?: string | null;
+  returnedDate?: string | null;
+  status:
+    | 'PENDING'
+    | 'SENT'
+    | 'IN_TRANSIT'
+    | 'DELIVERED'
+    | 'RETURNED'
+    | 'FAILED';
+  statusTimeline?: TimelineEvent[] | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TimelineEvent {
+  status: string;
+  timestamp: string;
+  notes?: string;
+  location?: string;
+  userId?: string;
 }

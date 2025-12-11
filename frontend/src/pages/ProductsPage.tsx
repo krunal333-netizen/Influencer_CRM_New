@@ -631,8 +631,8 @@ export default function ProductsPage() {
                     Successful Imports: {importResults.successes.length}
                   </h3>
                   <div className="space-y-1">
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     {importResults.successes.map(
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       (product: any, index: number) => (
                         <div
                           key={index}

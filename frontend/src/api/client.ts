@@ -17,6 +17,8 @@ import {
   CampaignProduct,
   PaginatedResponse,
   CsvImportResult,
+  InvoiceImage,
+  CourierShipment,
 } from '../types/models';
 
 const apiClient = axios.create({
@@ -267,6 +269,173 @@ export const importProductsCsvRequest = async (
       },
     }
   );
+  return data;
+};
+
+// Invoice endpoints
+export const uploadInvoiceRequest = async (
+  file: File,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  metadata?: Record<string, any>
+): Promise<InvoiceImage> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  if (metadata) {
+    Object.keys(metadata).forEach((key) => {
+      formData.append(key, metadata[key]);
+    });
+  }
+  const { data } = await apiClient.post<InvoiceImage>(
+    '/invoices/upload',
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }
+  );
+  return data;
+};
+
+export const getInvoicesRequest = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  params?: Record<string, any>
+): Promise<InvoiceImage[]> => {
+  const { data } = await apiClient.get<InvoiceImage[]>('/invoices', { params });
+  return data;
+};
+
+export const getInvoiceRequest = async (id: string): Promise<InvoiceImage> => {
+  const { data } = await apiClient.get<InvoiceImage>(`/invoices/${id}`);
+  return data;
+};
+
+export const updateInvoiceRequest = async (
+  id: string,
+  payload: Partial<InvoiceImage>
+): Promise<InvoiceImage> => {
+  const { data } = await apiClient.put<InvoiceImage>(
+    `/invoices/${id}`,
+    payload
+  );
+  return data;
+};
+
+export const updateInvoiceStatusRequest = async (
+  id: string,
+  status: string
+): Promise<InvoiceImage> => {
+  const { data } = await apiClient.patch<InvoiceImage>(
+    `/invoices/${id}/status`,
+    { status }
+  );
+  return data;
+};
+
+export const linkInvoiceToCampaignRequest = async (
+  id: string,
+  campaignId: string
+): Promise<InvoiceImage> => {
+  const { data } = await apiClient.post<InvoiceImage>(
+    `/invoices/${id}/link-campaign`,
+    { campaignId }
+  );
+  return data;
+};
+
+export const linkInvoiceToProductRequest = async (
+  id: string,
+  productId: string
+): Promise<InvoiceImage> => {
+  const { data } = await apiClient.post<InvoiceImage>(
+    `/invoices/${id}/link-product`,
+    { productId }
+  );
+  return data;
+};
+
+export const deleteInvoiceRequest = async (id: string): Promise<void> => {
+  await apiClient.delete(`/invoices/${id}`);
+};
+
+// Courier Shipment endpoints
+export const getCourierShipmentsRequest = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  params?: Record<string, any>
+): Promise<CourierShipment[]> => {
+  const { data } = await apiClient.get<CourierShipment[]>(
+    '/courier-shipments',
+    { params }
+  );
+  return data;
+};
+
+export const getCourierShipmentRequest = async (
+  id: string
+): Promise<CourierShipment> => {
+  const { data } = await apiClient.get<CourierShipment>(
+    `/courier-shipments/${id}`
+  );
+  return data;
+};
+
+export const createCourierShipmentRequest = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: Record<string, any>
+): Promise<CourierShipment> => {
+  const { data } = await apiClient.post<CourierShipment>(
+    '/courier-shipments',
+    payload
+  );
+  return data;
+};
+
+export const updateCourierShipmentRequest = async (
+  id: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: Record<string, any>
+): Promise<CourierShipment> => {
+  const { data } = await apiClient.put<CourierShipment>(
+    `/courier-shipments/${id}`,
+    payload
+  );
+  return data;
+};
+
+export const updateCourierShipmentStatusRequest = async (
+  id: string,
+  status: string
+): Promise<CourierShipment> => {
+  const { data } = await apiClient.patch<CourierShipment>(
+    `/courier-shipments/${id}/status`,
+    { status }
+  );
+  return data;
+};
+
+export const addCourierTimelineEventRequest = async (
+  id: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  event: Record<string, any>
+): Promise<CourierShipment> => {
+  const { data } = await apiClient.post<CourierShipment>(
+    `/courier-shipments/${id}/timeline-event`,
+    event
+  );
+  return data;
+};
+
+export const deleteCourierShipmentRequest = async (
+  id: string
+): Promise<void> => {
+  await apiClient.delete(`/courier-shipments/${id}`);
+};
+
+export const getCourierShipmentStatsRequest = async (): Promise<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Record<string, any>
+> => {
+  const { data } = await apiClient.get('/courier-shipments/stats/aggregate');
   return data;
 };
 
