@@ -2,8 +2,22 @@ export interface Product {
   id: string;
   name: string;
   sku: string;
+  asCode?: string | null;
   description?: string | null;
+  category?:
+    | 'ELECTRONICS'
+    | 'FASHION'
+    | 'BEAUTY'
+    | 'LIFESTYLE'
+    | 'FITNESS'
+    | 'HOME'
+    | 'FOOD'
+    | 'OTHER';
+  stock?: number | null;
   price: string; // Decimal as string
+  imageUrls?: string[] | null;
+  metadata?: Record<string, unknown> | null;
+  campaignProducts?: CampaignProduct[];
   createdAt: string;
   updatedAt: string;
 }
@@ -27,11 +41,22 @@ export interface Campaign {
   name: string;
   description?: string | null;
   status: string; // DRAFT, ACTIVE, COMPLETED, CANCELLED
+  type?: 'REELS' | 'POSTS' | 'STORIES' | 'MIXED' | null;
   budget?: string | null; // Decimal as string
+  budgetSpent?: string | null; // Decimal as string
+  budgetAllocated?: string | null; // Decimal as string
   startDate?: string | null;
   endDate?: string | null;
+  deliverableDeadline?: string | null;
+  brief?: string | null;
+  reelsRequired?: number | null;
+  postsRequired?: number | null;
+  storiesRequired?: number | null;
   storeId: string;
   store?: Store;
+  products?: CampaignProduct[];
+  influencerLinks?: InfluencerCampaignLink[];
+  financialDocuments?: FinancialDocument[];
   createdAt: string;
   updatedAt: string;
 }
@@ -160,4 +185,24 @@ export interface RunStatusResponse {
   statusMessage?: string | null;
   resultsCount: number;
   isDryRun: boolean;
+}
+
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: PaginationMeta;
+}
+
+export interface CsvImportResult<T> {
+  successes: T[];
+  errors: Array<{
+    row: number;
+    error: string;
+  }>;
 }
