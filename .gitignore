@@ -98,3 +98,8 @@ jspm_packages/
 
 # DynamoDB Local files
 .dynamodb/
+
+# File uploads
+uploads/invoices/*
+!uploads/invoices/.gitkeep
+uploads/

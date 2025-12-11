@@ -8,6 +8,8 @@ import { InfluencersModule } from './influencers/influencers.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { ProductsModule } from './products/products.module';
 import { ApifyModule } from './apify/apify.module';
+import { InvoicesModule } from './invoices/invoices.module';
+import { CourierShipmentsModule } from './courier-shipments/courier-shipments.module';
 import { RolesGuard } from './common/guards/roles.guard';
 
 @Module({
@@ -20,6 +22,8 @@ import { RolesGuard } from './common/guards/roles.guard';
     CampaignsModule,
     ProductsModule,
     ApifyModule,
+    InvoicesModule,
+    CourierShipmentsModule,
   ],
   providers: [
     {
