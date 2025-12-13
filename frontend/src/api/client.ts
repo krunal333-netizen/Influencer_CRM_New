@@ -17,9 +17,14 @@ import {
   CampaignProduct,
   PaginatedResponse,
   CsvImportResult,
+  FinancialDocument,
   InvoiceImage,
   CourierShipment,
 } from '../types/models';
+import {
+  AnalyticsDashboardResponse,
+  PerformanceMetricsResponse,
+} from '../types/analytics';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:3000',
@@ -524,6 +529,29 @@ export const getFinancialDocumentStatsByFirmRequest = async (): Promise<
   Record<string, any>[]
 > => {
   const { data } = await apiClient.get('/financial-documents/stats/by-firm');
+  return data;
+};
+
+// Analytics endpoints
+export const getAnalyticsDashboardRequest = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  params?: Record<string, any>
+): Promise<AnalyticsDashboardResponse> => {
+  const { data } = await apiClient.get<AnalyticsDashboardResponse>(
+    '/analytics/dashboard',
+    { params }
+  );
+  return data;
+};
+
+export const getPerformanceMetricsRequest = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  params?: Record<string, any>
+): Promise<PerformanceMetricsResponse> => {
+  const { data } = await apiClient.get<PerformanceMetricsResponse>(
+    '/analytics/performance',
+    { params }
+  );
   return data;
 };
 
