@@ -439,4 +439,92 @@ export const getCourierShipmentStatsRequest = async (): Promise<
   return data;
 };
 
+// Financial Document endpoints
+export const getFinancialDocumentsRequest = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  params?: Record<string, any>
+): Promise<PaginatedResponse<FinancialDocument>> => {
+  const { data } = await apiClient.get<PaginatedResponse<FinancialDocument>>(
+    '/financial-documents',
+    { params }
+  );
+  return data;
+};
+
+export const getFinancialDocumentRequest = async (
+  id: string
+): Promise<FinancialDocument> => {
+  const { data } = await apiClient.get<FinancialDocument>(
+    `/financial-documents/${id}`
+  );
+  return data;
+};
+
+export const createFinancialDocumentRequest = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: Record<string, any>
+): Promise<FinancialDocument> => {
+  const { data } = await apiClient.post<FinancialDocument>(
+    '/financial-documents',
+    payload
+  );
+  return data;
+};
+
+export const updateFinancialDocumentRequest = async (
+  id: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: Record<string, any>
+): Promise<FinancialDocument> => {
+  const { data } = await apiClient.put<FinancialDocument>(
+    `/financial-documents/${id}`,
+    payload
+  );
+  return data;
+};
+
+export const updateFinancialDocumentStatusRequest = async (
+  id: string,
+  status: string
+): Promise<FinancialDocument> => {
+  const { data } = await apiClient.patch<FinancialDocument>(
+    `/financial-documents/${id}/status`,
+    { status }
+  );
+  return data;
+};
+
+export const markFinancialDocumentPaidRequest = async (
+  id: string,
+  paidDate?: string
+): Promise<FinancialDocument> => {
+  const { data } = await apiClient.patch<FinancialDocument>(
+    `/financial-documents/${id}/mark-paid`,
+    { paidDate }
+  );
+  return data;
+};
+
+export const deleteFinancialDocumentRequest = async (
+  id: string
+): Promise<void> => {
+  await apiClient.delete(`/financial-documents/${id}`);
+};
+
+export const getFinancialDocumentStatsByTypeRequest = async (): Promise<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Record<string, any>
+> => {
+  const { data } = await apiClient.get('/financial-documents/stats/by-type');
+  return data;
+};
+
+export const getFinancialDocumentStatsByFirmRequest = async (): Promise<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Record<string, any>[]
+> => {
+  const { data } = await apiClient.get('/financial-documents/stats/by-firm');
+  return data;
+};
+
 export default apiClient;

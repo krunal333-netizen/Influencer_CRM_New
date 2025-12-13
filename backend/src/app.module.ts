@@ -10,6 +10,7 @@ import { ProductsModule } from './products/products.module';
 import { ApifyModule } from './apify/apify.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { CourierShipmentsModule } from './courier-shipments/courier-shipments.module';
+import { FinancialDocumentsModule } from './financial-documents/financial-documents.module';
 import { RolesGuard } from './common/guards/roles.guard';
 
 @Module({
@@ -24,6 +25,7 @@ import { RolesGuard } from './common/guards/roles.guard';
     ApifyModule,
     InvoicesModule,
     CourierShipmentsModule,
+    FinancialDocumentsModule,
   ],
   providers: [
     {
