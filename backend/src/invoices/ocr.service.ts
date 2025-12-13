@@ -66,12 +66,12 @@ export class InvoiceOcrService {
     totalAmount?: number;
   } {
     // Mock parser - in production, implement actual OCR parsing logic
-    const result = {
-      asCode: undefined,
-      productDescription: undefined,
-      unitPrice: undefined,
-      totalAmount: undefined,
-    };
+    const result: {
+      asCode?: string;
+      productDescription?: string;
+      unitPrice?: number;
+      totalAmount?: number;
+    } = {};
 
     // Simple pattern matching for demonstration
     const asCodeMatch = rawText.match(/AS[A-Z0-9]{6,}/i);

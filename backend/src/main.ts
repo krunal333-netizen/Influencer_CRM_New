@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
+import * as express from 'express';
 import * as path from 'path';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
@@ -14,9 +15,7 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // Serve static files for invoice images
-  app.useStaticAssets(path.join(process.cwd(), 'uploads'), {
-    prefix: '/uploads',
-  });
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
   app.useGlobalPipes(
     new ValidationPipe({
