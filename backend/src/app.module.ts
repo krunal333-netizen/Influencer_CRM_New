@@ -11,6 +11,8 @@ import { ApifyModule } from './apify/apify.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { CourierShipmentsModule } from './courier-shipments/courier-shipments.module';
 import { FinancialDocumentsModule } from './financial-documents/financial-documents.module';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { PayoutsModule } from './payouts/payouts.module';
 import { RolesGuard } from './common/guards/roles.guard';
 
 @Module({
@@ -26,6 +28,8 @@ import { RolesGuard } from './common/guards/roles.guard';
     InvoicesModule,
     CourierShipmentsModule,
     FinancialDocumentsModule,
+    AnalyticsModule,
+    PayoutsModule,
   ],
   providers: [
     {

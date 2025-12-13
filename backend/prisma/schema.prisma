@@ -94,6 +94,7 @@ model Store {
   campaigns Campaign[]
   sentShipments CourierShipment[] @relation("SendStore")
   returnedShipments CourierShipment[] @relation("ReturnStore")
+  performanceMetrics PerformanceMetric[]
   
   @@index([firmId])
   @@map("stores")
@@ -155,6 +156,8 @@ model Influencer {
   
   campaignLinks InfluencerCampaignLink[]
   courierShipments CourierShipment[]
+  performanceMetrics PerformanceMetric[]
+  payouts           Payout[]
   
   @@index([status])
   @@map("influencers")
@@ -214,6 +217,8 @@ model Campaign {
   financialDocuments FinancialDocument[]
   invoiceImages      InvoiceImage[]
   courierShipments   CourierShipment[]
+  performanceMetrics PerformanceMetric[]
+  payouts            Payout[]
   
   @@index([storeId])
   @@index([status])
@@ -399,4 +404,136 @@ model AnalyticsSnapshot {
   
   @@index([timestamp])
   @@map("analytics_snapshots")
+}
+
+// ===== Performance Metrics =====
+
+enum MetricType {
+  REACH
+  ENGAGEMENT
+  ROI
+  FOLLOWERS
+  LIKES
+  COMMENTS
+  SHARES
+  CONVERSIONS
+  INSTAGRAM_LINK_CLICKS
+}
+
+model PerformanceMetric {
+  id                String      @id @default(cuid())
+  metricType        MetricType
+  value             Decimal     @db.Decimal(15, 4)
+  
+  // References
+  influencer        Influencer? @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  influencerId      String?
+  campaign          Campaign?   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaignId        String?
+  store             Store?      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId           String?
+  
+  // Instagram-specific data (from Apify)
+  instagramProfileUrl String?
+  instagramFollowers  Int?
+  instagramEngagementRate Decimal? @db.Decimal(5, 2)
+  instagramLinkData   Json?      // Apify-sourced Instagram link click data
+  
+  // Additional metadata
+  metadata          Json?
+  recordedAt        DateTime    @default(now())
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  
+  @@index([influencerId])
+  @@index([campaignId])
+  @@index([storeId])
+  @@index([metricType])
+  @@index([recordedAt])
+  @@map("performance_metrics")
+}
+
+// ===== Payout Management =====
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+enum PayoutType {
+  INFLUENCER_COMMISSION
+  CAMPAIGN_PAYMENT
+  REFUND
+}
+
+model Payout {
+  id                String           @id @default(cuid())
+  type              PayoutType
+  amount            Decimal          @db.Decimal(12, 2)
+  currency          String           @default("USD")
+  status            PaymentStatus    @default(PENDING)
+  
+  // References
+  influencer        Influencer?      @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  influencerId      String?
+  campaign          Campaign?        @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaignId        String?
+  
+  // Linked documents
+  invoiceId         String?          // Link to FinancialDocument (Invoice)
+  poId              String?          // Link to FinancialDocument (PO)
+  
+  // Payment timeline
+  requestedAt       DateTime         @default(now())
+  approvedAt        DateTime?
+  processedAt       DateTime?
+  paidAt            DateTime?
+  failedAt          DateTime?
+  
+  // Audit trail
+  statusHistory     Json?            // Array of {status, timestamp, notes, changedBy}
+  notes             String?
+  
+  metadata          Json?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  
+  @@index([influencerId])
+  @@index([campaignId])
+  @@index([status])
+  @@index([type])
+  @@index([requestedAt])
+  @@map("payouts")
+}
+
+// ===== Document Linkage (for Invoice ↔ PO ↔ Payout mapping) =====
+
+model DocumentLink {
+  id                String           @id @default(cuid())
+  
+  // Primary document
+  primaryDocumentId String
+  primaryDocumentType String         // "INVOICE" | "PO" | "PAYOUT"
+  
+  // Linked documents
+  linkedDocumentId  String
+  linkedDocumentType String         // "INVOICE" | "PO" | "PAYOUT"
+  
+  // Relationship metadata
+  relationship      String          // e.g., "invoice_for_po", "payout_for_invoice"
+  notes             String?
+  
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  
+  @@unique([primaryDocumentId, linkedDocumentId])
+  @@index([primaryDocumentId])
+  @@index([linkedDocumentId])
+  @@index([primaryDocumentType])
+  @@index([linkedDocumentType])
+  @@map("document_links")
 }
