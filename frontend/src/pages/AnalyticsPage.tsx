@@ -1,9 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import DashboardLayout from '../components/layout/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../components/ui/card';
 import { Input } from '../components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '../components/ui/tabs';
 import ComparisonWidget from '../components/analytics/ComparisonWidget';
 import CampaignRoiChart from '../components/analytics/CampaignRoiChart';
@@ -11,7 +23,10 @@ import InfluencerPerformanceScoring from '../components/analytics/InfluencerPerf
 import InstagramLinkTracking from '../components/analytics/InstagramLinkTracking';
 import { useAuth } from '../hooks/useAuth';
 import { useCampaigns } from '../hooks/useCampaigns';
-import { useAnalyticsDashboard, usePerformanceMetrics } from '../hooks/useAnalytics';
+import {
+  useAnalyticsDashboard,
+  usePerformanceMetrics,
+} from '../hooks/useAnalytics';
 import type { AnalyticsDashboardQuery } from '../types/analytics';
 
 const toNumber = (value: unknown): number | undefined => {
@@ -61,7 +76,10 @@ export default function AnalyticsPage() {
   );
 
   const campaignsQuery = useCampaigns({ page: 1, limit: 100 });
-  const campaigns = campaignsQuery.data?.data ?? [];
+  const campaigns = useMemo(
+    () => campaignsQuery.data?.data ?? [],
+    [campaignsQuery.data?.data]
+  );
 
   const stores = useMemo(() => {
     const map = new Map<string, { id: string; name: string }>();
@@ -70,7 +88,9 @@ export default function AnalyticsPage() {
         map.set(c.storeId, { id: c.storeId, name: c.store.name });
       }
     }
-    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+    return Array.from(map.values()).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
   }, [campaigns]);
 
   const [storeId, setStoreId] = useState<string | undefined>(undefined);
@@ -100,7 +120,9 @@ export default function AnalyticsPage() {
             : 'store',
       firmId,
       storeId:
-        primaryContext === 'store' && storeScope === 'store' ? storeId : undefined,
+        primaryContext === 'store' && storeScope === 'store'
+          ? storeId
+          : undefined,
       campaignId: primaryContext === 'campaign' ? campaignId : undefined,
       dateMode,
       month: dateMode === 'month' ? month : undefined,
@@ -130,14 +152,14 @@ export default function AnalyticsPage() {
     return (current?.summary ?? current) as unknown as
       | Record<string, unknown>
       | undefined;
-  }, [dashboardQuery.data?.current]);
+  }, [dashboardQuery.data]);
 
   const previousSummary = useMemo(() => {
     const previous = dashboardQuery.data?.previous;
     return (previous?.summary ?? previous) as unknown as
       | Record<string, unknown>
       | undefined;
-  }, [dashboardQuery.data?.previous]);
+  }, [dashboardQuery.data]);
 
   const currentMetrics = getRecord(currentSummary, 'metrics');
   const previousMetrics = getRecord(previousSummary, 'metrics');
@@ -163,7 +185,10 @@ export default function AnalyticsPage() {
   const roiPrevious = getMetricValue(previousMetrics, 'roi');
 
   const budgetUtilCurrent = getMetricValue(currentMetrics, 'budgetUtilization');
-  const budgetUtilPrevious = getMetricValue(previousMetrics, 'budgetUtilization');
+  const budgetUtilPrevious = getMetricValue(
+    previousMetrics,
+    'budgetUtilization'
+  );
 
   const campaignsSummary = getRecord(currentSummary, 'campaigns');
   const influencersSummary = getRecord(currentSummary, 'influencers');
@@ -189,7 +214,9 @@ export default function AnalyticsPage() {
 
   const budgetUtilization =
     toNumber(financialSummary?.budgetUtilization) ??
-    (typeof totalBudget === 'number' && totalBudget > 0 && typeof spentBudget === 'number'
+    (typeof totalBudget === 'number' &&
+    totalBudget > 0 &&
+    typeof spentBudget === 'number'
       ? (spentBudget / totalBudget) * 100
       : undefined);
 
@@ -205,11 +232,16 @@ export default function AnalyticsPage() {
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 className="text-3xl font-bold text-slate-900">Analytics</h2>
-            <p className="text-slate-600">Monitor performance, ROI, and budget utilization</p>
+            <p className="text-slate-600">
+              Monitor performance, ROI, and budget utilization
+            </p>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Tabs value={primaryContext} onValueChange={(v) => setPrimaryContext(v as PrimaryContext)}>
+            <Tabs
+              value={primaryContext}
+              onValueChange={(v) => setPrimaryContext(v as PrimaryContext)}
+            >
               <TabsList>
                 <TabsTrigger value="store">Store</TabsTrigger>
                 <TabsTrigger value="campaign">Campaign</TabsTrigger>
@@ -218,7 +250,10 @@ export default function AnalyticsPage() {
 
             {primaryContext === 'store' ? (
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <Tabs value={storeScope} onValueChange={(v) => setStoreScope(v as StoreScope)}>
+                <Tabs
+                  value={storeScope}
+                  onValueChange={(v) => setStoreScope(v as StoreScope)}
+                >
                   <TabsList>
                     <TabsTrigger value="firm">Firm</TabsTrigger>
                     <TabsTrigger value="store">Store</TabsTrigger>
@@ -255,7 +290,10 @@ export default function AnalyticsPage() {
               </Select>
             )}
 
-            <Select value={dateMode} onValueChange={(v) => setDateMode(v as DateMode)}>
+            <Select
+              value={dateMode}
+              onValueChange={(v) => setDateMode(v as DateMode)}
+            >
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Date mode" />
               </SelectTrigger>
@@ -307,7 +345,10 @@ export default function AnalyticsPage() {
         campaigns.length === 0 ? (
           <Card>
             <CardContent className="pt-6 text-center text-slate-600">
-              <p>No campaigns found. Create a campaign to view campaign analytics.</p>
+              <p>
+                No campaigns found. Create a campaign to view campaign
+                analytics.
+              </p>
             </CardContent>
           </Card>
         ) : null}
@@ -351,15 +392,15 @@ export default function AnalyticsPage() {
 
         {/* Campaign Metrics */}
         <div>
-          <h3 className="mb-4 text-lg font-semibold text-slate-900">Campaign Metrics</h3>
+          <h3 className="mb-4 text-lg font-semibold text-slate-900">
+            Campaign Metrics
+          </h3>
           <div className="grid gap-4 md:grid-cols-4">
             <Card>
               <CardContent className="pt-6">
                 <div className="text-center">
                   <p className="text-4xl font-bold text-slate-900">
-                    {isLoading
-                      ? '—'
-                      : (campaignTotal?.toLocaleString() ?? '—')}
+                    {isLoading ? '—' : (campaignTotal?.toLocaleString() ?? '—')}
                   </p>
                   <p className="mt-2 text-sm text-slate-600">Total Campaigns</p>
                 </div>
@@ -373,7 +414,9 @@ export default function AnalyticsPage() {
                       ? '—'
                       : (campaignActive?.toLocaleString() ?? '—')}
                   </p>
-                  <p className="mt-2 text-sm text-slate-600">Active Campaigns</p>
+                  <p className="mt-2 text-sm text-slate-600">
+                    Active Campaigns
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -393,9 +436,7 @@ export default function AnalyticsPage() {
               <CardContent className="pt-6">
                 <div className="text-center">
                   <p className="text-4xl font-bold text-slate-600">
-                    {isLoading
-                      ? '—'
-                      : (campaignDraft?.toLocaleString() ?? '—')}
+                    {isLoading ? '—' : (campaignDraft?.toLocaleString() ?? '—')}
                   </p>
                   <p className="mt-2 text-sm text-slate-600">Drafts</p>
                 </div>
@@ -406,7 +447,9 @@ export default function AnalyticsPage() {
 
         {/* Influencer Metrics */}
         <div>
-          <h3 className="mb-4 text-lg font-semibold text-slate-900">Influencer Pipeline</h3>
+          <h3 className="mb-4 text-lg font-semibold text-slate-900">
+            Influencer Pipeline
+          </h3>
           <div className="grid gap-4 md:grid-cols-4">
             <Card>
               <CardContent className="pt-6">
@@ -416,7 +459,9 @@ export default function AnalyticsPage() {
                       ? '—'
                       : (influencerTotal?.toLocaleString() ?? '—')}
                   </p>
-                  <p className="mt-2 text-sm text-slate-600">Total Influencers</p>
+                  <p className="mt-2 text-sm text-slate-600">
+                    Total Influencers
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -461,12 +506,16 @@ export default function AnalyticsPage() {
 
         {/* Financial Metrics */}
         <div>
-          <h3 className="mb-4 text-lg font-semibold text-slate-900">Financial Overview</h3>
+          <h3 className="mb-4 text-lg font-semibold text-slate-900">
+            Financial Overview
+          </h3>
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
               <CardContent className="pt-6">
                 <div className="space-y-3">
-                  <p className="text-sm font-medium text-slate-600">Total Budget</p>
+                  <p className="text-sm font-medium text-slate-600">
+                    Total Budget
+                  </p>
                   <p className="text-3xl font-bold text-slate-900">
                     {typeof totalBudget === 'number'
                       ? `$${(totalBudget / 1000).toFixed(0)}K`
@@ -478,7 +527,9 @@ export default function AnalyticsPage() {
             <Card>
               <CardContent className="pt-6">
                 <div className="space-y-3">
-                  <p className="text-sm font-medium text-slate-600">Total Spent</p>
+                  <p className="text-sm font-medium text-slate-600">
+                    Total Spent
+                  </p>
                   <p className="text-3xl font-bold text-orange-600">
                     {typeof spentBudget === 'number'
                       ? `$${(spentBudget / 1000).toFixed(0)}K`
@@ -490,7 +541,9 @@ export default function AnalyticsPage() {
             <Card>
               <CardContent className="pt-6">
                 <div className="space-y-3">
-                  <p className="text-sm font-medium text-slate-600">Remaining Budget</p>
+                  <p className="text-sm font-medium text-slate-600">
+                    Remaining Budget
+                  </p>
                   <p className="text-3xl font-bold text-emerald-600">
                     {typeof remainingBudget === 'number'
                       ? `$${(remainingBudget / 1000).toFixed(0)}K`
@@ -511,7 +564,9 @@ export default function AnalyticsPage() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-end justify-between">
-                <p className="text-sm font-medium text-slate-600">Budget Used</p>
+                <p className="text-sm font-medium text-slate-600">
+                  Budget Used
+                </p>
                 <p className="text-2xl font-bold text-slate-900">
                   {typeof budgetUtilization === 'number'
                     ? `${budgetUtilization.toFixed(1)}%`
@@ -541,7 +596,10 @@ export default function AnalyticsPage() {
         </Card>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <CampaignRoiChart data={roiSeries} isLoading={performanceQuery.isLoading} />
+          <CampaignRoiChart
+            data={roiSeries}
+            isLoading={performanceQuery.isLoading}
+          />
           <InfluencerPerformanceScoring
             scores={influencerScores}
             isLoading={performanceQuery.isLoading}

@@ -1,8 +1,18 @@
 import { useState } from 'react';
-import { MoreVertical, FileText, CheckCircle, XCircle, Clock, Download } from 'lucide-react';
+import {
+  MoreVertical,
+  FileText,
+  CheckCircle,
+  XCircle,
+  Download,
+} from 'lucide-react';
 import StatusBadge from '../StatusBadge';
 import { FinancialDocument } from '../../types/models';
-import { useUpdateFinancialDocumentStatus, useMarkFinancialDocumentPaid, useDeleteFinancialDocument } from '../../hooks/useFinancialDocuments';
+import {
+  useUpdateFinancialDocumentStatus,
+  useMarkFinancialDocumentPaid,
+  useDeleteFinancialDocument,
+} from '../../hooks/useFinancialDocuments';
 
 interface DocumentTableProps {
   documents: FinancialDocument[];
@@ -87,7 +97,9 @@ export default function DocumentTable({
     return (
       <div className="py-12 text-center">
         <FileText className="mx-auto h-12 w-12 text-slate-400" />
-        <p className="mt-2 text-sm text-slate-600">No financial documents found</p>
+        <p className="mt-2 text-sm text-slate-600">
+          No financial documents found
+        </p>
       </div>
     );
   }
@@ -97,14 +109,30 @@ export default function DocumentTable({
       <table className="w-full">
         <thead>
           <tr className="border-b border-slate-200 bg-slate-50">
-            <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Document</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Type</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Campaign</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Amount</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Status</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Issue Date</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Due Date</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Actions</th>
+            <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
+              Document
+            </th>
+            <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
+              Type
+            </th>
+            <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
+              Campaign
+            </th>
+            <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
+              Amount
+            </th>
+            <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
+              Status
+            </th>
+            <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
+              Issue Date
+            </th>
+            <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
+              Due Date
+            </th>
+            <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -118,14 +146,20 @@ export default function DocumentTable({
                 <div className="flex items-center gap-3">
                   {getTypeIcon(doc.type)}
                   <div>
-                    <p className="text-sm font-medium text-slate-900">{doc.documentNumber}</p>
+                    <p className="text-sm font-medium text-slate-900">
+                      {doc.documentNumber}
+                    </p>
                     {doc.description && (
-                      <p className="text-xs text-slate-500 truncate max-w-xs">{doc.description}</p>
+                      <p className="text-xs text-slate-500 truncate max-w-xs">
+                        {doc.description}
+                      </p>
                     )}
                   </div>
                 </div>
               </td>
-              <td className="px-6 py-4 text-sm text-slate-600">{getTypeLabel(doc.type)}</td>
+              <td className="px-6 py-4 text-sm text-slate-600">
+                {getTypeLabel(doc.type)}
+              </td>
               <td className="px-6 py-4 text-sm text-slate-600">
                 {doc.campaign?.name || '-'}
               </td>
